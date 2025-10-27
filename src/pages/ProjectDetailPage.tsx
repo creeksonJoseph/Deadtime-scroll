@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Code, RefreshCw } from 'lucide-react';
+import { Code, RefreshCw, Sparkles } from 'lucide-react';
 import { projectService } from '../services/projectService';
 import { Project } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
+import { useWallet } from '../contexts/WalletContext';
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams();
+  const { isConnected } = useWallet();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const [comment, setComment] = useState('');
 
   useEffect(() => {
     if (projectId) {
@@ -76,8 +77,8 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
-        {project.repo_url && (
-          <div className="mb-6">
+        <div className="mb-6 flex flex-wrap gap-4">
+          {project.repo_url && (
             <a
               href={project.repo_url}
               target="_blank"
@@ -87,8 +88,17 @@ export default function ProjectDetailPage() {
               <Code className="w-5 h-5" />
               <span>View Repository</span>
             </a>
-          </div>
-        )}
+          )}
+          {isConnected && (
+            <Link
+              to={`/projects/${projectId}/revive`}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-cyan-500 text-black px-6 py-3 font-bold hover:from-primary/80 hover:to-cyan-500/80 transition-all"
+            >
+              <Sparkles className="w-5 h-5" />
+              Revive This Project
+            </Link>
+          )}
+        </div>
 
         <div className="mb-8">
           <p className="text-zinc-gray text-base leading-relaxed">

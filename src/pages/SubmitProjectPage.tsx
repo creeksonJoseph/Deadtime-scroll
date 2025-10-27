@@ -14,6 +14,7 @@ export default function SubmitProjectPage() {
     description: '',
     category: 'Tech',
     repo_url: '',
+    deployed_url: '',
   });
 
   const handleSubmit = async (e: FormEvent) => {
@@ -23,9 +24,21 @@ export default function SubmitProjectPage() {
       return;
     }
 
+    if (!formData.repo_url.trim()) {
+      alert('GitHub repository URL is required');
+      return;
+    }
+
     try {
       setLoading(true);
-      const project = await projectService.create(formData);
+      const project = await projectService.create({
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        repo_url: formData.repo_url,
+        deployed_url: formData.deployed_url || undefined,
+      });
+      alert('Project submitted successfully!');
       navigate(`/projects/${project.id}`);
     } catch (error) {
       console.error('Error creating project:', error);
@@ -62,7 +75,7 @@ export default function SubmitProjectPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-white text-sm font-bold mb-2">
-            Project Name
+            Project Name <span className="text-primary">*</span>
           </label>
           <input
             type="text"
@@ -76,7 +89,7 @@ export default function SubmitProjectPage() {
 
         <div>
           <label className="block text-white text-sm font-bold mb-2">
-            Description
+            Description <span className="text-primary">*</span>
           </label>
           <textarea
             required
@@ -85,14 +98,14 @@ export default function SubmitProjectPage() {
               setFormData({ ...formData, description: e.target.value })
             }
             rows={6}
-            className="w-full bg-background-dark border border-zinc-gray text-white px-4 py-3 focus:outline-none focus:border-primary"
+            className="w-full bg-background-dark border border-zinc-gray text-white px-4 py-3 focus:outline-none focus:border-primary resize-none"
             placeholder="Describe the project and why it should be revived"
           />
         </div>
 
         <div>
           <label className="block text-white text-sm font-bold mb-2">
-            Category
+            Category <span className="text-primary">*</span>
           </label>
           <select
             value={formData.category}
@@ -111,35 +124,44 @@ export default function SubmitProjectPage() {
 
         <div>
           <label className="block text-white text-sm font-bold mb-2">
-            Repository URL (Optional)
+            GitHub Repository URL <span className="text-primary">*</span>
           </label>
           <input
             type="url"
+            required
             value={formData.repo_url}
             onChange={(e) =>
               setFormData({ ...formData, repo_url: e.target.value })
             }
             className="w-full bg-background-dark border border-zinc-gray text-white px-4 py-3 focus:outline-none focus:border-primary"
-            placeholder="https://github.com/..."
+            placeholder="https://github.com/username/repo"
           />
+          <p className="text-zinc-500 text-sm mt-1">Required - Your project's GitHub repository</p>
         </div>
 
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-primary text-black py-3 px-6 font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Submitting...' : 'Submit Project'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/projects')}
-            className="flex-1 bg-transparent border border-zinc-gray text-zinc-gray py-3 px-6 font-bold hover:bg-zinc-gray/20 transition-colors"
-          >
-            Cancel
-          </button>
+        <div>
+          <label className="block text-white text-sm font-bold mb-2">
+            Deployed Site URL (Optional)
+          </label>
+          <input
+            type="url"
+            value={formData.deployed_url}
+            onChange={(e) =>
+              setFormData({ ...formData, deployed_url: e.target.value })
+            }
+            className="w-full bg-background-dark border border-zinc-gray text-white px-4 py-3 focus:outline-none focus:border-primary"
+            placeholder="https://your-project.vercel.app"
+          />
+          <p className="text-zinc-500 text-sm mt-1">Optional - Live demo link if available</p>
         </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-primary text-black px-6 py-4 text-lg font-bold hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Submitting...' : 'Submit Project'}
+        </button>
       </form>
     </div>
   );

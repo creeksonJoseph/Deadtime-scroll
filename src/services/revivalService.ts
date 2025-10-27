@@ -15,12 +15,12 @@ export const revivalService = {
   async getById(id: string) {
     const { data, error } = await supabase
       .from('revivals')
-      .select('*, profiles(*), projects(*)')
+      .select('*, profiles!revivals_reviver_id_fkey(*), projects(*)')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
-    return data as Revival;
+    return data as Revival | null;
   },
 
   async getByUser(userId: string) {
@@ -65,6 +65,24 @@ export const revivalService = {
     const { data, error } = await supabase.rpc('increment_revival_blessings', {
       revival_id: revivalId,
     });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async update(revivalId: string, updates: {
+    title?: string;
+    description?: string;
+    deployed_url?: string;
+    github_url?: string;
+    explanation_uri?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('revivals')
+      .update(updates)
+      .eq('id', revivalId)
+      .select()
+      .single();
 
     if (error) throw error;
     return data;

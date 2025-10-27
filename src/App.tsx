@@ -12,6 +12,7 @@ import ChatPage from './pages/ChatPage';
 import SubmitProjectPage from './pages/SubmitProjectPage';
 import MyRevivalsPage from './pages/MyRevivalsPage';
 import BloodlinePage from './pages/BloodlinePage';
+import ReviveProjectPage from './pages/ReviveProjectPage';
 
 function App() {
   return (
@@ -28,7 +29,9 @@ function App() {
               <Route path="/revivals/:revivalId" element={<RevivalDetailPage />} />
               <Route path="/revivals/:revivalId/bloodline" element={<BloodlinePage />} />
               <Route path="/submit" element={<SubmitProjectPage />} />
+              <Route path="/projects/:projectId/revive" element={<ReviveProjectPage />} />
               <Route path="/revivals" element={<MyRevivalsPage />} />
+              <Route path="/my-revivals" element={<MyRevivalsPage />} />
               <Route path="/profile" element={<UserProfilePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/chat" element={<ChatPage />} />
