@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Heart, Users, GitBranch, ChevronDown, Zap, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import toast, { Toaster } from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 import AnimatedBackground from '../components/AnimatedBackground';
+import Toast from '../components/Toast';
 
 export default function HomePage() {
   const { isConnected, connectWallet } = useWallet();
   const [featuresVisible, setFeaturesVisible] = useState(false);
   const [prevConnected, setPrevConnected] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -33,20 +34,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (isConnected && !prevConnected) {
-      toast.success('Wallet Connected Successfully!', {
-        duration: 3000,
-        position: 'top-center',
-        style: {
-          background: '#000',
-          color: '#00ff90',
-          border: '1px solid #00ff90',
-          borderRadius: '8px',
-        },
-        iconTheme: {
-          primary: '#00ff90',
-          secondary: '#000',
-        },
-      });
+      setShowToast(true);
     }
     setPrevConnected(isConnected);
   }, [isConnected, prevConnected]);
@@ -64,7 +52,11 @@ export default function HomePage() {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      <Toaster />
+      <Toast
+        message="Wallet Connected Successfully!"
+        visible={showToast}
+        onClose={() => setShowToast(false)}
+      />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center text-center px-4 overflow-hidden">
         {/* Animated Background */}
