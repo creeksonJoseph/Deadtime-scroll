@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Heart, Users, GitBranch, ChevronDown, Zap, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast, { Toaster } from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 
 export default function HomePage() {
   const { isConnected, connectWallet } = useWallet();
   const [featuresVisible, setFeaturesVisible] = useState(false);
+  const [prevConnected, setPrevConnected] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -29,6 +31,26 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (isConnected && !prevConnected) {
+      toast.success('Wallet Connected Successfully!', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#000',
+          color: '#00ff90',
+          border: '1px solid #00ff90',
+          borderRadius: '8px',
+        },
+        iconTheme: {
+          primary: '#00ff90',
+          secondary: '#000',
+        },
+      });
+    }
+    setPrevConnected(isConnected);
+  }, [isConnected, prevConnected]);
+
   const handleConnectWallet = async () => {
     if (!isConnected) {
       await connectWallet();
@@ -42,6 +64,7 @@ export default function HomePage() {
 
   return (
     <div className="bg-black text-white min-h-screen">
+      <Toaster />
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center text-center px-4 overflow-hidden">
         {/* Animated Background */}
@@ -70,19 +93,45 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
           >
-            <button
-              onClick={scrollToGraveyard}
-              className="btn-primary"
-            >
-              Explore the Graveyard
-            </button>
-            <button
-              onClick={handleConnectWallet}
-              className="btn-secondary group"
-            >
-              <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-              {isConnected ? 'Connected' : 'Connect Wallet'}
-            </button>
+            <AnimatePresence mode="wait">
+              {!isConnected ? (
+                <motion.div
+                  key="two-buttons"
+                  className="flex flex-col md:flex-row gap-6 justify-center"
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <button
+                    onClick={scrollToGraveyard}
+                    className="btn-primary"
+                  >
+                    Explore the Graveyard
+                  </button>
+                  <button
+                    onClick={handleConnectWallet}
+                    className="btn-secondary group"
+                  >
+                    <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                    Connect Wallet
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="one-button"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <button
+                    onClick={scrollToGraveyard}
+                    className="btn-primary"
+                  >
+                    Explore the Graveyard
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
 
@@ -227,10 +276,12 @@ export default function HomePage() {
             <Link to="/projects" className="btn-primary">
               Browse Graveyard
             </Link>
-            <button onClick={handleConnectWallet} className="btn-secondary group">
-              <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-              {isConnected ? 'Connected' : 'Connect Wallet'}
-            </button>
+            {!isConnected && (
+              <button onClick={handleConnectWallet} className="btn-secondary group">
+                <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                Connect Wallet
+              </button>
+            )}
           </div>
         </div>
       </section>
