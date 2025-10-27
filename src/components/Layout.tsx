@@ -5,29 +5,42 @@ import Sidebar from './Sidebar';
 import { useWallet } from '../contexts/WalletContext';
 
 export default function Layout() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { isConnected, loading } = useWallet();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const { isConnected } = useWallet();
   const location = useLocation();
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
+  const toggleMobileSidebar = () => {
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  };
+
+  const closeMobileSidebar = () => {
+    setIsMobileSidebarOpen(false);
   };
 
   const isHomePage = location.pathname === '/';
   const showSidebar = isConnected && !isHomePage;
 
-  console.log('Layout - isConnected:', isConnected, 'loading:', loading, 'isHomePage:', isHomePage, 'showSidebar:', showSidebar);
-
   return (
-    <div className="flex h-screen overflow-hidden bg-background-dark">
-      {showSidebar && <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onMenuToggle={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-        <main className="flex-1 overflow-y-auto">
+    <div className="flex flex-col h-screen overflow-hidden bg-background-dark">
+      <Header onMenuToggle={toggleMobileSidebar} />
+
+      <div className="flex flex-1 overflow-hidden">
+        {showSidebar && (
+          <Sidebar
+            isCollapsed={isSidebarCollapsed}
+            isMobileOpen={isMobileSidebarOpen}
+            onToggle={toggleSidebar}
+            onMobileClose={closeMobileSidebar}
+          />
+        )}
+        <main className={`flex-1 overflow-y-auto transition-all duration-300 ${
+          showSidebar && !isSidebarCollapsed ? 'ml-0' : ''
+        }`}>
           <Outlet />
         </main>
       </div>

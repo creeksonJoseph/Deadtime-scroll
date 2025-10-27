@@ -1,91 +1,124 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Home, FolderOpen, PlusCircle, RefreshCw, MessageSquare, User, LogOut } from 'lucide-react';
+import { Home, FolderOpen, Sparkles, MessageCircle, Trophy, User, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 
 interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isCollapsed: boolean;
+  isMobileOpen: boolean;
+  onToggle: () => void;
+  onMobileClose: () => void;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isCollapsed, isMobileOpen, onToggle, onMobileClose }: SidebarProps) {
   const location = useLocation();
-  const { isConnected, disconnectWallet } = useWallet();
+  const navigate = useNavigate();
+  const { disconnectWallet } = useWallet();
+
+  const handleDisconnect = () => {
+    disconnectWallet();
+    navigate('/');
+    onMobileClose();
+  };
 
   const menuItems = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/projects', icon: FolderOpen, label: 'Projects' },
-    { path: '/submit', icon: PlusCircle, label: 'Submit Project' },
-    { path: '/revivals', icon: RefreshCw, label: 'My Revivals' },
-    { path: '/chat', icon: MessageSquare, label: 'Messages' },
-    { path: '/profile', icon: User, label: 'Account' },
+    { icon: Home, label: 'Home', path: '/' },
+    { icon: FolderOpen, label: 'Projects', path: '/projects' },
+    { icon: Sparkles, label: 'My Revivals', path: '/my-revivals' },
+    { icon: MessageCircle, label: 'Messages', path: '/chat' },
+    { icon: Trophy, label: 'Leaderboard', path: '/leaderboard' },
+    { icon: User, label: 'Profile', path: '/profile' },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
+    if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
-  const handleLogout = () => {
-    disconnectWallet();
-    onClose();
-  };
-
-  console.log('Sidebar - isConnected:', isConnected);
-
-  if (!isConnected) {
-    console.log('Sidebar not rendering - wallet not connected');
-    return null;
-  }
-
-  console.log('Sidebar rendering - isOpen:', isOpen);
-
   return (
     <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={onClose}
-        ></div>
-      )}
+      <div
+        className={`${
+          isMobileOpen ? 'block' : 'hidden'
+        } md:hidden fixed inset-0 bg-black/50 z-40`}
+        onClick={onMobileClose}
+      />
+
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen w-64 border-r border-zinc-gray bg-background-dark z-50 transition-transform duration-300 flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
+        className={`
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0
+          fixed md:relative
+          h-[calc(100vh-73px)]
+          ${isCollapsed ? 'w-20' : 'w-64'}
+          bg-zinc-900
+          border-r border-zinc-800
+          transition-all duration-300
+          z-50
+          flex flex-col
+        `}
       >
-        <div className="flex-1 overflow-y-auto p-4">
-          <nav className="flex flex-col gap-2 mt-16 md:mt-4">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.path);
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={onClose}
-                  className={`flex items-center gap-3 px-3 py-3 transition-colors ${
-                    active
-                      ? 'bg-primary/20 text-primary'
-                      : 'text-white hover:bg-primary/10 hover:text-primary'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className={`text-sm ${active ? 'font-bold' : 'font-medium'}`}>
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-        <div className="p-4 border-t border-zinc-gray">
+        <nav className="flex-1 overflow-y-auto py-4">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={onMobileClose}
+                className={`
+                  flex items-center gap-3 px-4 py-3 mx-2 rounded-lg
+                  transition-all duration-200
+                  ${active
+                    ? 'bg-primary text-black font-semibold'
+                    : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                  }
+                  ${isCollapsed ? 'justify-center' : ''}
+                `}
+                title={isCollapsed ? item.label : undefined}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!isCollapsed && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="border-t border-zinc-800 p-4 space-y-2">
           <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-3 w-full text-white hover:bg-red-500/20 hover:text-red-500 transition-colors"
+            onClick={handleDisconnect}
+            className={`
+              w-full flex items-center gap-3 px-4 py-3 rounded-lg
+              text-red-400 hover:bg-red-400/10 hover:text-red-300
+              transition-all duration-200
+              ${isCollapsed ? 'justify-center' : ''}
+            `}
+            title={isCollapsed ? 'Disconnect Wallet' : undefined}
           >
-            <LogOut className="w-5 h-5" />
-            <span className="text-sm font-medium">Logout</span>
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {!isCollapsed && <span>Disconnect Wallet</span>}
+          </button>
+
+          <button
+            onClick={onToggle}
+            className={`
+              hidden md:flex
+              w-full items-center gap-3 px-4 py-3 rounded-lg
+              text-zinc-400 hover:bg-zinc-800 hover:text-white
+              transition-all duration-200
+              ${isCollapsed ? 'justify-center' : ''}
+            `}
+            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <>
+                <ChevronLeft className="w-5 h-5 flex-shrink-0" />
+                <span>Collapse</span>
+              </>
+            )}
           </button>
         </div>
       </aside>

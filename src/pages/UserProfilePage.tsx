@@ -1,96 +1,247 @@
-import { useState, useEffect } from 'react';
-import { Copy } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Camera, Edit2, Save, X } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
-import { supabase, Badge } from '../lib/supabase';
+import { profileService } from '../services/profileService';
 
 export default function UserProfilePage() {
-  const { profile } = useWallet();
-  const [badges, setBadges] = useState<Badge[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { profile, walletAddress } = useWallet();
+  const [isEditing, setIsEditing] = useState(false);
+  const [username, setUsername] = useState('');
+  const [bio, setBio] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (profile) {
-      loadBadges();
+      setUsername(profile.username || '');
+      setBio(profile.bio || '');
+      setAvatarUrl(profile.avatar_url || '');
     }
   }, [profile]);
 
-  const loadBadges = async () => {
-    if (!profile) return;
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('badges')
-        .select('*')
-        .eq('user_id', profile.id);
-      if (error) throw error;
-      setBadges(data || []);
-    } catch (error) {
-      console.error('Error loading badges:', error);
-    } finally {
-      setLoading(false);
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        setAvatarUrl(base64);
+
+        if (walletAddress) {
+          await profileService.update(walletAddress, { avatar_url: base64 });
+          window.location.reload();
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      alert('Failed to upload avatar. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!walletAddress) return;
+
+    try {
+      setSaving(true);
+      await profileService.update(walletAddress, {
+        username,
+        bio,
+        avatar_url: avatarUrl,
+      });
+      setIsEditing(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (profile) {
+      setUsername(profile.username || '');
+      setBio(profile.bio || '');
+      setAvatarUrl(profile.avatar_url || '');
+    }
+    setIsEditing(false);
   };
 
   if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-zinc-gray text-xl">Please connect your wallet</p>
+        <p className="text-zinc-400 text-xl">Please connect your wallet to view profile</p>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between border-b border-zinc-gray pb-8 mb-8 flex-wrap gap-4">
-        <div className="flex items-center gap-6">
-          <img
-            className="w-32 h-32"
-            alt="Profile avatar"
-            src={profile.avatar_url || 'https://via.placeholder.com/128'}
-          />
-          <div>
-            <p className="text-white text-4xl font-bold">{profile.username}</p>
-            <div className="flex items-center gap-2">
-              <p className="text-zinc-gray text-base">{profile.wallet_address.slice(0, 6)}...{profile.wallet_address.slice(-4)}</p>
-              <button aria-label="Copy Address">
-                <Copy className="text-zinc-gray hover:text-primary text-lg" />
+    <div className="bg-background-dark min-h-screen p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-primary text-4xl font-black">My Profile</h1>
+          {!isEditing ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 bg-primary text-black px-6 py-3 font-bold hover:bg-primary/80 transition-colors"
+            >
+              <Edit2 className="w-4 h-4" />
+              Edit Profile
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={handleCancel}
+                className="flex items-center gap-2 border border-zinc-gray text-zinc-gray px-6 py-3 font-bold hover:bg-zinc-gray/20 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Cancel
               </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-2 bg-primary text-black px-6 py-3 font-bold hover:bg-primary/80 transition-colors disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 mb-6">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            <div className="relative group">
+              <img
+                src={avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border-4 border-primary"
+              />
+              <button
+                onClick={handleAvatarClick}
+                disabled={isUploading}
+                className="absolute inset-0 w-32 h-32 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                {isUploading ? (
+                  <div className="text-white text-sm">Uploading...</div>
+                ) : (
+                  <Camera className="w-8 h-8 text-white" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+
+            <div className="flex-1 space-y-6">
+              <div>
+                <label className="block text-zinc-400 text-sm font-semibold mb-2">
+                  Username
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Enter your username"
+                  />
+                ) : (
+                  <p className="text-white text-xl font-bold">{username}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 text-sm font-semibold mb-2">
+                  Wallet Address
+                </label>
+                <p className="text-zinc-500 font-mono text-sm break-all">
+                  {walletAddress}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 text-sm font-semibold mb-2">
+                  Bio
+                </label>
+                {isEditing ? (
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                    placeholder="Tell us about yourself..."
+                  />
+                ) : (
+                  <p className="text-zinc-300">
+                    {bio || 'No bio added yet. Click edit to add one!'}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex gap-8 mb-8 flex-wrap">
-        <div className="flex flex-1 flex-col gap-2 p-6 border border-zinc-gray min-w-[200px]">
-          <p className="text-white text-lg">Total Revivals</p>
-          <p className="text-white text-5xl font-bold">{profile.total_revivals}</p>
-        </div>
-        <div className="flex flex-1 flex-col gap-2 p-6 border border-zinc-gray min-w-[200px]">
-          <p className="text-white text-lg">Total Blessings Received</p>
-          <p className="text-white text-5xl font-bold">{profile.total_blessings}</p>
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-white text-2xl font-bold py-5">NFT Badges</h2>
-        {loading ? (
-          <p className="text-zinc-gray">Loading badges...</p>
-        ) : badges.length === 0 ? (
-          <p className="text-zinc-gray">No badges earned yet</p>
-        ) : (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
-            {badges.map((badge) => (
-              <div
-                key={badge.id}
-                className="group relative bg-cover bg-center flex flex-col justify-end p-4 aspect-square border border-zinc-gray hover:border-primary"
-                style={{ backgroundImage: `url("${badge.image_url}")` }}
-              >
-                <div className="absolute inset-0 bg-black/50 group-hover:bg-primary/20 transition-colors"></div>
-                <p className="relative text-white text-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity">{badge.name}</p>
-              </div>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+            <h3 className="text-zinc-400 text-sm font-semibold mb-2">Total Blessings</h3>
+            <p className="text-primary text-3xl font-bold">{profile.total_blessings}</p>
           </div>
-        )}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+            <h3 className="text-zinc-400 text-sm font-semibold mb-2">Projects Submitted</h3>
+            <p className="text-primary text-3xl font-bold">{profile.projects_count}</p>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+            <h3 className="text-zinc-400 text-sm font-semibold mb-2">Revivals Created</h3>
+            <p className="text-primary text-3xl font-bold">{profile.revivals_count}</p>
+          </div>
+        </div>
+
+        <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 className="text-white text-xl font-bold mb-4">Change Profile Photo</h3>
+          <p className="text-zinc-400 mb-4">
+            Click on your profile photo above to upload a new image. Supported formats: JPG, PNG, GIF. Max size: 5MB.
+          </p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleAvatarClick}
+              disabled={isUploading}
+              className="flex items-center gap-2 bg-primary text-black px-6 py-3 font-bold hover:bg-primary/80 transition-colors disabled:opacity-50"
+            >
+              <Camera className="w-4 h-4" />
+              {isUploading ? 'Uploading...' : 'Upload Photo'}
+            </button>
+            <span className="text-zinc-500 text-sm">
+              Or paste an image URL in edit mode
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
