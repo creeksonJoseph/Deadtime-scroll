@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { PlusCircle } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { Revival } from '../lib/supabase';
 
@@ -49,8 +49,8 @@ export default function RevivalListPage() {
                 )}
                 <p className="text-zinc-gray text-base line-clamp-3">{revival.description}</p>
                 <div className="flex items-center gap-2 mt-4">
-                  <PlusCircle className="text-primary w-4 h-4" />
-                  <p className="text-zinc-gray text-sm">{revival.blessing_count} Blessings</p>
+                  <Sparkles className="text-primary w-5 h-5" />
+                  <p className="text-zinc-gray text-sm font-semibold">{revival.blessing_count} Blessings</p>
                 </div>
               </div>
               <Link

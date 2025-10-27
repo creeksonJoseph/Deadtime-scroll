@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { Revival } from '../lib/supabase';
+import CommentSection from '../components/CommentSection';
 
 export default function RevivalDetailPage() {
   const { revivalId } = useParams();
@@ -81,7 +82,7 @@ export default function RevivalDetailPage() {
           <p className="text-zinc-gray text-base leading-relaxed">{revival.description}</p>
         </div>
 
-        <div className="border-t border-zinc-gray/50 py-6 mb-8">
+        <div className="border-t border-zinc-gray/50 py-6 mb-12">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h3 className="text-zinc-gray text-xl font-bold mb-2">Bless this Revival</h3>
@@ -96,6 +97,8 @@ export default function RevivalDetailPage() {
             </div>
           </div>
         </div>
+
+        <CommentSection revivalId={revival.id} initialCount={revival.comment_count} />
       </div>
     </div>
   );

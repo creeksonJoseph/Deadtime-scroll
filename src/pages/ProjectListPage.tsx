@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Flame } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { projectService } from '../services/projectService';
 import { Project } from '../lib/supabase';
@@ -89,8 +89,8 @@ export default function ProjectListPage() {
                       </h2>
                     </div>
                     <div className="flex items-center gap-2 text-zinc-400">
-                      <Flame className="text-[#00ff90]" />
-                      <span>{project.blessing_count}</span>
+                      <RefreshCw className="text-[#00ff90] w-5 h-5" />
+                      <span className="font-semibold">{project.revival_count}</span>
                     </div>
                   </div>
                   <p className="text-zinc-400 mb-6 line-clamp-3">{project.description}</p>

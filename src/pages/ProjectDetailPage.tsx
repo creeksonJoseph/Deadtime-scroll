@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Code, Flame } from 'lucide-react';
+import { Code, RefreshCw } from 'lucide-react';
 import { projectService } from '../services/projectService';
 import { Project } from '../lib/supabase';
+import CommentSection from '../components/CommentSection';
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams();
@@ -66,8 +67,8 @@ export default function ProjectDetailPage() {
               </div>
             )}
             <div className="flex items-center gap-2">
-              <Flame className="text-primary" />
-              <span className="text-white">{project.blessing_count} Blessings</span>
+              <RefreshCw className="text-primary" />
+              <span className="text-white">{project.revival_count} Revivals</span>
             </div>
             <p className="text-zinc-400 text-sm">
               {project.category} | {new Date(project.created_at).toLocaleDateString()}
@@ -110,7 +111,7 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-12">
           <Link
             to={`/projects/${project.id}/revivals`}
             className="bg-primary text-black px-8 py-3 text-lg font-bold hover:bg-primary/80 transition-colors"
@@ -118,6 +119,8 @@ export default function ProjectDetailPage() {
             ✨ Revive This Project
           </Link>
         </div>
+
+        <CommentSection projectId={project.id} initialCount={project.comment_count} />
       </div>
     </div>
   );
