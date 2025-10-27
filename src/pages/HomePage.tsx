@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 import Toast from '../components/Toast';
+import { motion } from 'motion/react';
+import { Search, Code, Users, Rocket } from 'lucide-react';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -32,6 +34,32 @@ export default function HomePage() {
 
     return () => observer.disconnect();
   }, []);
+  const steps = [
+  {
+    icon: Search,
+    number: '01',
+    title: 'Discover Dead Projects',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Browse through our curated graveyard of abandoned projects waiting for revival.'
+  },
+  {
+    icon: Code,
+    number: '02',
+    title: 'Fork & Revive',
+    description: 'Sed do eiusmod tempor incididunt ut labore. Clone the repository and start breathing new life into the codebase.'
+  },
+  {
+    icon: Users,
+    number: '03',
+    title: 'Gather Blessings',
+    description: 'Quis nostrud exercitation ullamco laboris. Share your progress and receive support from the community through blessings.'
+  },
+  {
+    icon: Rocket,
+    number: '04',
+    title: 'Launch Revival',
+    description: 'Duis aute irure dolor in reprehenderit. Deploy your revived project and inspire others to continue the resurrection cycle.'
+  }
+];
 
   useEffect(() => {
     if (isConnected && !prevConnected) {
@@ -251,44 +279,84 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Network Visualization Section */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="grid-pattern w-full h-full"></div>
-        </div>
-        <div className="relative max-w-6xl mx-auto px-6">
-          <div className="glass-card p-8 border border-primary/30 rounded-xl">
-            <h2 className="text-4xl font-bold mb-6 text-primary glow-text">
-              Project Lineage Network
-            </h2>
-            <p className="text-lg mb-8 text-zinc-300">
-              Our advanced visualization system maps relationships between abandoned projects and their revived counterparts,
-              showing the flow of code and ideas through the developer ecosystem.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-primary flex items-center gap-2">
-                  <Sparkles className="w-6 h-6" />
-                  Code DNA Analysis
-                </h3>
-                <p className="text-zinc-400">
-                  We analyze commit patterns, code structure, and architectural decisions to establish lineage relationships.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-primary flex items-center gap-2">
-                  <Activity className="w-6 h-6" />
-                  Revival Impact Scoring
-                </h3>
-                <p className="text-zinc-400">
-                  Each revival is scored based on community engagement, code quality improvements, and adoption metrics.
-                </p>
-              </div>
-            </div>
+       <section className="py-24 px-4 relative">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 
+            className="mb-4 text-[#39FF14]"
+            style={{ 
+              fontFamily: 'Orbitron, sans-serif',
+              textShadow: '0 0 20px rgba(57, 255, 20, 0.5)'
+            }}
+          >
+            HOW IT WORKS
+          </h2>
+          <div className="w-24 h-1 bg-[#39FF14] mx-auto mb-6" style={{ boxShadow: '0 0 10px #39FF14' }} />
+          <p className="text-gray-400 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </motion.div>
+
+        <div className="relative">
+          {/* Connection Line */}
+          <div className="hidden lg:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#39FF14] to-transparent opacity-30" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                className="relative"
+              >
+                <div className="text-center">
+                  {/* Number Badge */}
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className="relative inline-block mb-6"
+                  >
+                    <div 
+                      className="w-20 h-20 rounded-full bg-black border-2 border-[#39FF14] flex items-center justify-center mx-auto"
+                      style={{ boxShadow: '0 0 30px rgba(57, 255, 20, 0.3)' }}
+                    >
+                      <step.icon className="w-10 h-10 text-[#39FF14]" />
+                    </div>
+                    <div 
+                      className="absolute -top-2 -right-2 w-8 h-8 bg-[#39FF14] rounded-full flex items-center justify-center text-black text-xs"
+                      style={{ fontFamily: 'Orbitron, sans-serif' }}
+                    >
+                      {step.number}
+                    </div>
+                  </motion.div>
+
+                  <h3 
+                    className="mb-4 text-white"
+                    style={{ fontFamily: 'Orbitron, sans-serif' }}
+                  >
+                    {step.title}
+                  </h3>
+
+                  <p 
+                    className="text-gray-400 leading-relaxed"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {step.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
-
+      </div>
+    </section>
       {/* CTA Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-black to-zinc-900">
         <div className="max-w-4xl mx-auto text-center">
