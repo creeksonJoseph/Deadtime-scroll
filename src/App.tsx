@@ -11,6 +11,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import ChatPage from './pages/ChatPage';
 import SubmitProjectPage from './pages/SubmitProjectPage';
 import MyRevivalsPage from './pages/MyRevivalsPage';
+import BloodlinePage from './pages/BloodlinePage';
 
 function App() {
   return (
@@ -24,6 +25,8 @@ function App() {
               <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
               <Route path="/projects/:projectId/revivals" element={<RevivalListPage />} />
               <Route path="/projects/:projectId/revivals/:revivalId" element={<RevivalDetailPage />} />
+              <Route path="/revivals/:revivalId" element={<RevivalDetailPage />} />
+              <Route path="/revivals/:revivalId/bloodline" element={<BloodlinePage />} />
               <Route path="/submit" element={<SubmitProjectPage />} />
               <Route path="/revivals" element={<MyRevivalsPage />} />
               <Route path="/profile" element={<UserProfilePage />} />
