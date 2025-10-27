@@ -24,10 +24,11 @@ export default function Layout() {
 
   const isHomePage = location.pathname === '/';
   const showSidebar = isConnected && !isHomePage;
+  const showHeader = !isHomePage;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background-dark">
-      <Header onMenuToggle={toggleMobileSidebar} />
+      {showHeader && <Header onMenuToggle={toggleMobileSidebar} />}
 
       <div className="flex flex-1 overflow-hidden">
         {showSidebar && (
