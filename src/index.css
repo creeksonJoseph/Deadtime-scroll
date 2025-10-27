@@ -4,6 +4,185 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Cyberpunk/Neon Styles */
+@layer utilities {
+  /* Glow Effects */
+  .glow-text {
+    text-shadow: 0 0 10px rgba(0, 255, 144, 0.7),
+                 0 0 20px rgba(0, 255, 144, 0.5),
+                 0 0 30px rgba(0, 255, 144, 0.3);
+  }
+
+  .glow-box {
+    box-shadow: 0 0 15px rgba(0, 255, 144, 0.5);
+  }
+
+  .glow-box:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 144, 0.8);
+  }
+
+  /* Glass Card Effect */
+  .glass-card {
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Animated Stars Background */
+  .stars, .stars2, .stars3 {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  .stars {
+    background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.3)"/></svg>') repeat;
+    animation: animateStars 50s linear infinite;
+  }
+
+  .stars2 {
+    background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"><circle cx="1" cy="1" r="1" fill="rgba(255,255,255,0.5)"/></svg>') repeat;
+    animation: animateStars 100s linear infinite;
+  }
+
+  .stars3 {
+    background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="3" height="3"><circle cx="1.5" cy="1.5" r="1" fill="rgba(0,255,144,0.4)"/></svg>') repeat;
+    animation: animateStars 150s linear infinite;
+  }
+
+  @keyframes animateStars {
+    from { transform: translateY(0); }
+    to { transform: translateY(-2000px); }
+  }
+
+  /* Grid Pattern */
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(0, 255, 144, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 144, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+  }
+
+  @keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+  }
+
+  /* Fade In Animations */
+  .animate-fade-in {
+    animation: fadeIn 1s ease-in;
+  }
+
+  .animate-fade-in-delayed {
+    animation: fadeIn 1s ease-in 0.3s both;
+  }
+
+  .animate-fade-in-delayed-2 {
+    animation: fadeIn 1s ease-in 0.6s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Slide Up Animation */
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Pulse Slow */
+  .animate-pulse-slow {
+    animation: pulseSlow 4s ease-in-out infinite;
+  }
+
+  @keyframes pulseSlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+}
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary text-black px-6 py-3 rounded-full font-semibold uppercase tracking-wide
+           transition-all duration-300 inline-flex items-center justify-center
+           hover:shadow-[0_10px_20px_rgba(0,255,144,0.3)] hover:-translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent text-primary px-6 py-3 rounded-full border-2 border-primary
+           font-semibold uppercase tracking-wide transition-all duration-300
+           inline-flex items-center justify-center
+           hover:bg-primary/10 hover:-translate-y-0.5
+           hover:shadow-[0_10px_20px_rgba(0,255,144,0.2)]
+           animate-[pulse_2s_ease-in-out_infinite];
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 144, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(0, 255, 144, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 144, 0);
+    }
+  }
+
+  /* Feature Cards */
+  .feature-card {
+    @apply bg-zinc-900/70 border border-primary/20 rounded-xl p-8
+           transition-all duration-300 backdrop-blur-sm
+           hover:border-primary hover:-translate-y-2
+           hover:shadow-[0_10px_30px_rgba(0,255,144,0.1)];
+  }
+
+  .feature-icon {
+    @apply w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center
+           mb-5 border border-primary/30;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.primary');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.primary');
+  opacity: 0.8;
+}
+
 body {
   font-family: 'Playfair Display', serif;
 }
