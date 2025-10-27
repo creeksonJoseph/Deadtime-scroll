@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Activity, Heart, Users, GitBranch, ChevronDown, Zap, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
@@ -7,6 +7,7 @@ import AnimatedBackground from '../components/AnimatedBackground';
 import Toast from '../components/Toast';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const { isConnected, connectWallet } = useWallet();
   const [featuresVisible, setFeaturesVisible] = useState(false);
   const [prevConnected, setPrevConnected] = useState(false);
@@ -45,7 +46,11 @@ export default function HomePage() {
     }
   };
 
-  const scrollToGraveyard = () => {
+  const goToProjects = () => {
+    navigate('/projects');
+  };
+
+  const scrollToFeatures = () => {
     const element = document.getElementById('features');
     element?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -95,7 +100,7 @@ export default function HomePage() {
                   transition={{ duration: 0.3 }}
                 >
                   <button
-                    onClick={scrollToGraveyard}
+                    onClick={goToProjects}
                     className="btn-primary"
                   >
                     Explore the Graveyard
@@ -116,7 +121,7 @@ export default function HomePage() {
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
                   <button
-                    onClick={scrollToGraveyard}
+                    onClick={goToProjects}
                     className="btn-primary"
                   >
                     Explore the Graveyard
@@ -128,7 +133,7 @@ export default function HomePage() {
         </div>
 
         <motion.button
-          onClick={scrollToGraveyard}
+          onClick={scrollToFeatures}
           className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-primary"
           animate={{
             y: [0, 10, 0],
