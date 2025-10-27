@@ -149,14 +149,43 @@ export default function HomePage() {
       </section>
 
       {/* Description Section */}
-      <section className="py-20 px-6 max-w-6xl mx-auto">
-        <div className="glass-card p-8 border border-primary/30 rounded-xl">
-          <p className="text-lg md:text-xl leading-relaxed text-center text-zinc-300">
-            DeadTime is a platform for developers to breathe new life into forgotten projects.
-            Track revivals, share progress, and connect through blessings — where effort meets resurrection.
-          </p>
-        </div>
-      </section>
+    <section className="py-24 px-4 relative">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="relative"
+        >
+          <div className="absolute inset-0 bg-[#39FF14] opacity-5 blur-3xl rounded-full" />
+          
+          <div className="relative bg-black border border-[#39FF14] border-opacity-30 rounded-2xl p-12 backdrop-blur-sm">
+            <div className="w-16 h-1 bg-[#39FF14] mb-8 mx-auto" style={{ boxShadow: '0 0 10px #39FF14' }} />
+            
+            <p 
+              className="text-center text-gray-300 leading-relaxed mb-6"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              DeadTime is a platform for developers to breathe new life into forgotten projects. 
+              Track revivals, share progress, and connect through blessings — where effort meets resurrection.
+            </p>
+            
+            <p 
+              className="text-center text-gray-400 leading-relaxed"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt 
+              ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+              laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
+              voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            </p>
+
+            <div className="w-16 h-1 bg-[#39FF14] mt-8 mx-auto" style={{ boxShadow: '0 0 10px #39FF14' }} />
+          </div>
+        </motion.div>
+      </div>
+    </section>
 
       {/* Features Section */}
       <section id="features" className="py-20 px-6">
