@@ -81,7 +81,7 @@ export default function HomePage() {
               className="btn-secondary group"
             >
               <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-              {isConnected ? 'Connected' : 'Connect to the Source'}
+              {isConnected ? 'Connected' : 'Connect Wallet'}
             </button>
           </motion.div>
         </div>
