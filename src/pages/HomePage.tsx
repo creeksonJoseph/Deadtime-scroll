@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 import Toast from '../components/Toast';
-import { motion } from 'motion/react';
-import { Search, Code, Users, Rocket } from 'lucide-react';
 
 export default function HomePage() {
   const navigate = useNavigate();
