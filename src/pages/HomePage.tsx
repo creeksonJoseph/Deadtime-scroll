@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, Heart, Users, GitBranch, ChevronDown, Zap, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 export default function HomePage() {
   const { isConnected, connectWallet } = useWallet();
@@ -43,21 +45,31 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center text-center px-4 overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-900 to-black">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent animate-pulse-slow"></div>
-          <div className="stars"></div>
-          <div className="stars2"></div>
-          <div className="stars3"></div>
-        </div>
+        <AnimatedBackground />
 
         <div className="relative z-10 max-w-4xl mx-auto">
-          <h1 className="text-6xl md:text-8xl font-black mb-6 text-primary glow-text animate-fade-in">
+          <motion.h1
+            className="text-6xl md:text-8xl font-black mb-6 text-primary glow-text"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
             DeadTime
-          </h1>
-          <p className="text-xl md:text-2xl mb-12 font-light tracking-wide text-zinc-300 animate-fade-in-delayed">
+          </motion.h1>
+          <motion.p
+            className="text-xl md:text-2xl mb-12 font-light tracking-wide text-zinc-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+          >
             "Reviving Abandoned Projects. One Line of Code at a Time."
-          </p>
-          <div className="flex flex-col md:flex-row gap-6 justify-center animate-fade-in-delayed-2">
+          </motion.p>
+          <motion.div
+            className="flex flex-col md:flex-row gap-6 justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          >
             <button
               onClick={scrollToGraveyard}
               className="btn-primary"
@@ -71,15 +83,23 @@ export default function HomePage() {
               <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
               {isConnected ? 'Connected' : 'Connect to the Source'}
             </button>
-          </div>
+          </motion.div>
         </div>
 
-        <button
+        <motion.button
           onClick={scrollToGraveyard}
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-primary animate-bounce"
+          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-primary"
+          animate={{
+            y: [0, 10, 0],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
         >
           <ChevronDown className="w-10 h-10" />
-        </button>
+        </motion.button>
       </section>
 
       {/* Description Section */}
