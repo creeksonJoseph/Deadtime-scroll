@@ -7,13 +7,17 @@ import AnimatedBackground from '../components/AnimatedBackground';
 import Toast from '../components/Toast';
 
 export default function HomePage() {
+  console.log('HomePage component rendering...');
   const navigate = useNavigate();
   const { isConnected, connectWallet } = useWallet();
   const [featuresVisible, setFeaturesVisible] = useState(false);
   const [prevConnected, setPrevConnected] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
+  console.log('HomePage state:', { isConnected, featuresVisible, showToast });
+
   useEffect(() => {
+    console.log('HomePage: Setting up IntersectionObserver');
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -60,7 +64,9 @@ export default function HomePage() {
 ];
 
   useEffect(() => {
+    console.log('HomePage: Connection state changed:', { isConnected, prevConnected });
     if (isConnected && !prevConnected) {
+      console.log('HomePage: Showing connection toast');
       setShowToast(true);
     }
     setPrevConnected(isConnected);
@@ -73,6 +79,7 @@ export default function HomePage() {
   };
 
   const goToProjects = () => {
+    console.log('HomePage: Navigating to projects page');
     navigate('/projects');
   };
 

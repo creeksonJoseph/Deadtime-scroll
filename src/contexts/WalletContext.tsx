@@ -15,13 +15,17 @@ interface WalletContextType {
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
+  console.log('WalletProvider: Initializing...');
   const [isConnected, setIsConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('WalletProvider state:', { isConnected, walletAddress, loading, error });
+
   useEffect(() => {
+    console.log('WalletProvider: Running checkConnection effect');
     checkConnection();
   }, []);
 
@@ -131,6 +135,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('walletAddress');
     console.log('Wallet disconnected');
   };
+
+  console.log('WalletProvider: Rendering children');
 
   return (
     <WalletContext.Provider

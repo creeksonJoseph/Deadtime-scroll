@@ -15,6 +15,8 @@ import BloodlinePage from './pages/BloodlinePage';
 import ReviveProjectPage from './pages/ReviveProjectPage';
 
 function App() {
+  console.log('App component mounting...');
+
   return (
     <Router>
       <WalletProvider>

@@ -5,10 +5,13 @@ import Sidebar from './Sidebar';
 import { useWallet } from '../contexts/WalletContext';
 
 export default function Layout() {
+  console.log('Layout component rendering...');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { isConnected } = useWallet();
   const location = useLocation();
+
+  console.log('Layout state:', { isConnected, pathname: location.pathname });
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -25,6 +28,8 @@ export default function Layout() {
   const isHomePage = location.pathname === '/';
   const showSidebar = isConnected && !isHomePage;
   const showHeader = !isHomePage;
+
+  console.log('Layout display logic:', { isHomePage, showSidebar, showHeader });
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background-dark">
