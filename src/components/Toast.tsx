@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 interface ToastProps {
   message: string;
+  type: 'success' | 'error';
   visible: boolean;
   onClose: () => void;
 }
 
-export default function Toast({ message, visible, onClose }: ToastProps) {
+export default function Toast({ message, type, visible, onClose }: ToastProps) {
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(() => {
@@ -17,6 +18,13 @@ export default function Toast({ message, visible, onClose }: ToastProps) {
       return () => clearTimeout(timer);
     }
   }, [visible, onClose]);
+
+  const icon = type === 'success' 
+    ? <CheckCircle className="w-5 h-5 text-primary" /> 
+    : <XCircle className="w-5 h-5 text-red-500" />;
+
+  const borderColor = type === 'success' ? 'border-primary' : 'border-red-500';
+  const textColor = type === 'success' ? 'text-primary' : 'text-red-500';
 
   return (
     <AnimatePresence>
@@ -28,9 +36,9 @@ export default function Toast({ message, visible, onClose }: ToastProps) {
           transition={{ duration: 0.3 }}
           className="fixed top-6 left-1/2 -translate-x-1/2 z-50"
         >
-          <div className="bg-black border border-primary rounded-lg px-6 py-4 shadow-lg flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-primary" />
-            <span className="text-primary font-medium">{message}</span>
+          <div className={`bg-black border ${borderColor} rounded-lg px-6 py-4 shadow-lg flex items-center gap-3`}>
+            {icon}
+            <span className={`font-medium ${textColor}`}>{message}</span>
           </div>
         </motion.div>
       )}

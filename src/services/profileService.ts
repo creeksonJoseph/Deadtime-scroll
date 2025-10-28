@@ -4,7 +4,7 @@ export const profileService = {
   async getByWallet(walletAddress: string) {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, projects_count:projects(count), revivals_count:revivals(count)')
       .eq('wallet_address', walletAddress)
       .maybeSingle();
 
@@ -15,11 +15,13 @@ export const profileService = {
   async getById(id: string) {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, projects_count:projects(count), revivals_count:revivals(count)')
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw new Error(`Failed to fetch profile by ID ${id}: ${error.message}`);
+    }
     return data as Profile;
   },
 

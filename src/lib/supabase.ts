@@ -3,8 +3,12 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+if (!supabaseUrl) {
+  throw new Error('VITE_SUPABASE_URL environment variable is required');
+}
+
+if (!supabaseAnonKey) {
+  throw new Error('VITE_SUPABASE_ANON_KEY environment variable is required');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -15,7 +19,8 @@ export type Profile = {
   username: string | null;
   avatar_url: string | null;
   bio: string | null;
-  total_revivals: number;
+  revivals_count: number;
+  projects_count: number;
   total_blessings: number;
   created_at: string;
   updated_at: string;

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Camera, Edit2, Save, X } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
 import { profileService } from '../services/profileService';
-import { getUserBadges, getUnclaimedBadges, Badge } from '../services/blessingService';
+import { getUserBadges, Badge } from '../services/blessingService';
 import BadgeDisplay from '../components/BadgeDisplay';
 import Toast from '../components/Toast';
 
@@ -108,7 +108,7 @@ export default function UserProfilePage() {
     setIsEditing(false);
   };
 
-  const handleClaimBadge = async (badge: Badge) => {
+  const handleClaimBadge = async (_badge: Badge) => {
     setToastMessage('NFT minting feature coming soon! Connect your contract address to enable minting.');
     setToastType('success');
     setShowToast(true);
@@ -255,13 +255,12 @@ export default function UserProfilePage() {
         />
       </div>
 
-      {showToast && (
-        <Toast
-          message={toastMessage}
-          type={toastType}
-          onClose={() => setShowToast(false)}
-        />
-      )}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        visible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </div>
   );
 }
