@@ -209,7 +209,7 @@ export default function HomePage() {
               className="text-center text-gray-400 leading-relaxed"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-             Each blessing pushes your project closer to greatness — and once you’ve gathered enough, you’ll unlock exclusive NFT badges that showcase your dedication and impact. Beyond the code, DeadTime thrives on collaboration. Through community comments and feedback, you’ll get real-time motivation, ideas, and guidance from fellow builders walking the same path.
+             Each blessing pushes your project closer to greatness - and once you’ve gathered enough, you’ll unlock exclusive NFT badges that showcase your dedication and impact. Beyond the code, DeadTime thrives on collaboration. Through community comments and feedback, you’ll get real-time motivation, ideas, and guidance from fellow builders walking the same path.
             </p>
           
 
