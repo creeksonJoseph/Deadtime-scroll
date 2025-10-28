@@ -43,25 +43,25 @@ export default function HomePage() {
     icon: Search,
     number: '01',
     title: 'Discover Dead Projects',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Browse through our curated graveyard of abandoned projects waiting for revival.'
+    description: 'Browse the graveyard of abandoned projects waiting for revival. Filter by technology, complexity, and potential impact.'
   },
   {
     icon: Code,
     number: '02',
     title: 'Fork & Revive',
-    description: 'Sed do eiusmod tempor incididunt ut labore. Clone the repository and start breathing new life into the codebase.'
+    description: 'Select a project that resonates with you and claim it for revival. Set your goals and timeline for resurrection.'
   },
   {
     icon: Users,
     number: '03',
-    title: 'Gather Blessings',
-    description: 'Quis nostrud exercitation ullamco laboris. Share your progress and receive support from the community through blessings.'
+    title: 'Act on the project',
+    description: 'Fork, refactor, and breathe new life into the codebase. Track your progress and share updates with the community.'
   },
   {
     icon: Rocket,
     number: '04',
     title: 'Launch Revival',
-    description: 'Duis aute irure dolor in reprehenderit. Deploy your revived project and inspire others to continue the resurrection cycle.'
+    description: 'Deploy your revived project and receive blessings from the community. Your success inspires others to revive more projects.Users with a specific number of blessings get nft badges to show their dedication in contributing to evolve technology'
   }
 ];
 
