@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Sparkles, Edit2, Save, X, ExternalLink, GitBranch } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { useWallet } from '../contexts/WalletContext';
 import { Revival } from '../lib/supabase';
+import Notification from '../components/Notification';
 
 export default function MyRevivalsPage() {
   const { profile, isConnected } = useWallet();
+  const location = useLocation();
   const [revivals, setRevivals] = useState<Revival[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -17,12 +19,17 @@ export default function MyRevivalsPage() {
     deployed_url: '',
   });
   const [saving, setSaving] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info' | 'warning';
+    title: string;
+    message?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (profile) {
       loadRevivals();
     }
-  }, [profile]);
+  }, [profile, location.state]);
 
   const loadRevivals = async () => {
     try {
@@ -62,10 +69,18 @@ export default function MyRevivalsPage() {
       await revivalService.update(revivalId, editForm);
       await loadRevivals();
       setEditingId(null);
-      alert('Revival updated successfully!');
+      setNotification({
+        type: 'success',
+        title: 'Revival Updated!',
+        message: 'Your revival has been successfully updated',
+      });
     } catch (error) {
       console.error('Error updating revival:', error);
-      alert('Failed to update revival');
+      setNotification({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to update revival. Please try again.',
+      });
     } finally {
       setSaving(false);
     }
@@ -308,6 +323,15 @@ export default function MyRevivalsPage() {
           </div>
         )}
       </div>
+
+      {notification && (
+        <Notification
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }

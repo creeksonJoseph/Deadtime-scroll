@@ -1,5 +1,5 @@
 import { CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -16,7 +16,19 @@ export default function ConfirmModal({
   message = 'Your revival has been successfully registered.',
   revivalId,
 }: ConfirmModalProps) {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
+
+  const handleViewMyRevivals = () => {
+    onClose();
+    navigate('/my-revivals', { replace: true, state: { refresh: Date.now() } });
+  };
+
+  const handleViewRevival = () => {
+    onClose();
+    navigate(`/revivals/${revivalId}`, { replace: true });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -37,19 +49,19 @@ export default function ConfirmModal({
           <p className="text-zinc-400 mb-8">{message}</p>
 
           <div className="flex flex-col gap-3">
-            <Link
-              to="/my-revivals"
+            <button
+              onClick={handleViewMyRevivals}
               className="w-full bg-primary text-black py-3 px-6 font-bold hover:bg-primary/80 transition-colors rounded"
             >
               View My Revivals
-            </Link>
+            </button>
             {revivalId && (
-              <Link
-                to={`/revivals/${revivalId}`}
+              <button
+                onClick={handleViewRevival}
                 className="w-full border-2 border-primary text-primary py-3 px-6 font-bold hover:bg-primary hover:text-black transition-colors rounded"
               >
                 View Revival Details
-              </Link>
+              </button>
             )}
             <button
               onClick={onClose}
