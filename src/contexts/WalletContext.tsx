@@ -81,46 +81,39 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setError(null);
       console.log('Starting wallet connection...');
 
-      if (typeof window.ethereum !== 'undefined') {
-        console.log('MetaMask detected, requesting accounts...');
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('MetaMask is not installed. Please install MetaMask browser extension to continue.');
+      }
 
-        try {
-          const accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts',
-          });
+      console.log('MetaMask detected, requesting accounts...');
 
-          if (!accounts || accounts.length === 0) {
-            throw new Error('No accounts returned from MetaMask');
-          }
+      try {
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        });
 
-          const address = accounts[0].toLowerCase();
-          console.log('MetaMask connected with address:', address);
-
-          localStorage.setItem('walletAddress', address);
-          await loadProfile(address);
-
-          console.log('Wallet connection successful!');
-        } catch (metamaskError: any) {
-          if (metamaskError.code === 4001) {
-            throw new Error('Connection request rejected. Please try again.');
-          }
-          throw metamaskError;
+        if (!accounts || accounts.length === 0) {
+          throw new Error('No accounts returned from MetaMask');
         }
-      } else {
-        console.log('MetaMask not detected, using mock wallet...');
-        const mockAddress = `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`.toLowerCase();
-        console.log('Generated mock address:', mockAddress);
 
-        localStorage.setItem('walletAddress', mockAddress);
-        await loadProfile(mockAddress);
+        const address = accounts[0].toLowerCase();
+        console.log('MetaMask connected with address:', address);
 
-        console.log('Mock wallet connection successful!');
+        localStorage.setItem('walletAddress', address);
+        await loadProfile(address);
+
+        console.log('Wallet connection successful!');
+      } catch (metamaskError: any) {
+        if (metamaskError.code === 4001) {
+          throw new Error('Connection request rejected. Please approve the connection in MetaMask.');
+        }
+        throw metamaskError;
       }
     } catch (err) {
       console.error('Wallet connection error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to connect wallet';
       setError(errorMessage);
-      alert(`Failed to connect wallet: ${errorMessage}`);
+      throw err;
     } finally {
       setLoading(false);
     }
