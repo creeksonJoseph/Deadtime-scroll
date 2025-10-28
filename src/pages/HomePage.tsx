@@ -383,8 +383,7 @@ export default function HomePage() {
           </h2>
           <div className="w-24 h-1 bg-[#39FF14] mx-auto mb-6" style={{ boxShadow: '0 0 10px #39FF14' }} />
           <p className="text-gray-400 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+      Step into a world where passion meets purpose. Connect with developers who turn abandoned ideas into thriving projects, exchange knowledge, and grow together. Whether you’re reviving, creating, or supporting - every action fuels innovation and keeps the spirit of collaboration alive.
           </p>
         </motion.div>
           <div className="flex flex-col md:flex-row gap-6 justify-center">
