@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 import Toast from '../components/Toast';
+import { NetworkVisualization } from '../components/NetworkVisualization';
 
 export default function HomePage() {
   console.log('HomePage component rendering...');
@@ -362,6 +363,7 @@ export default function HomePage() {
         </div>
       </div>
     </section>
+      <NetworkVisualization />
       {/* CTA Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-black to-zinc-900">
         <div className="max-w-4xl mx-auto text-center">
