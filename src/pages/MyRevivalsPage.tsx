@@ -28,16 +28,31 @@ export default function MyRevivalsPage() {
   useEffect(() => {
     if (profile) {
       loadRevivals();
+    } else {
+      setLoading(false);
     }
   }, [profile, location.state]);
+
+  useEffect(() => {
+    if (profile) {
+      loadRevivals();
+    }
+  }, [location.pathname]);
 
   const loadRevivals = async () => {
     try {
       setLoading(true);
+      console.log('Loading revivals for profile:', profile);
       const data = await revivalService.getByUser(profile!.id);
+      console.log('Loaded revivals:', data);
       setRevivals(data);
     } catch (error) {
       console.error('Error loading revivals:', error);
+      setNotification({
+        type: 'error',
+        title: 'Failed to Load Revivals',
+        message: error instanceof Error ? error.message : 'Please try again',
+      });
     } finally {
       setLoading(false);
     }
@@ -124,6 +139,11 @@ export default function MyRevivalsPage() {
           <p className="text-zinc-400 mt-2">
             Manage your project revivals and update your progress
           </p>
+          {profile && (
+            <p className="text-zinc-600 text-xs mt-1">
+              Profile ID: {profile.id} | Username: {profile.username}
+            </p>
+          )}
         </div>
 
         {revivals.length === 0 ? (
