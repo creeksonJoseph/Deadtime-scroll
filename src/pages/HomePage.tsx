@@ -305,7 +305,7 @@ export default function HomePage() {
           </h2>
           <div className="w-24 h-1 bg-[#39FF14] mx-auto mb-6" style={{ boxShadow: '0 0 10px #39FF14' }} />
           <p className="text-gray-400 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Browse abandoned projects,revive projects and recieve nft badges.
           </p>
         </motion.div>
 
