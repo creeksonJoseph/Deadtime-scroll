@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Activity, Heart, Users, GitBranch, ChevronDown, Zap, Sparkles, Search, Code, Rocket } from 'lucide-react';
+import { Activity, Heart, Users, GitBranch, ChevronDown, Zap, Search, Code, Rocket } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 import Toast from '../components/Toast';
 import { NetworkVisualization } from '../components/NetworkVisualization';
+import { TimelineSection } from '../components/TimelineSection';
 
 export default function HomePage() {
   console.log('HomePage component rendering...');
@@ -364,25 +365,35 @@ export default function HomePage() {
       </div>
     </section>
       <NetworkVisualization />
+      <TimelineSection />
       {/* CTA Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-black to-zinc-900">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6 text-primary glow-text">
-            Ready to Resurrect?
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 
+            className="mb-4 text-[#39FF14]"
+            style={{ 
+              fontFamily: 'Orbitron, sans-serif',
+              textShadow: '0 0 20px rgba(57, 255, 20, 0.5)'
+            }}
+          >
+            JOIN THE COMMUNITY
           </h2>
-          <p className="text-xl mb-10 max-w-2xl mx-auto text-zinc-300">
-            Join the movement to bring abandoned projects back to life. Connect your wallet to get started.
+          <div className="w-24 h-1 bg-[#39FF14] mx-auto mb-6" style={{ boxShadow: '0 0 10px #39FF14' }} />
+          <p className="text-gray-400 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
           </p>
+        </motion.div>
           <div className="flex flex-col md:flex-row gap-6 justify-center">
             <Link to="/projects" className="btn-primary">
-              Browse Graveyard
+              Explore the Graveyard
             </Link>
-            {!isConnected && (
-              <button onClick={handleConnectWallet} className="btn-secondary group">
-                <Zap className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-                Connect Wallet
-              </button>
-            )}
           </div>
         </div>
       </section>
