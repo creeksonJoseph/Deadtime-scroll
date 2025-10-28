@@ -1,0 +1,210 @@
+import { supabase } from '../lib/supabase';
+
+export interface Blessing {
+  id: string;
+  revival_id: string;
+  user_wallet: string;
+  created_at: string;
+}
+
+export interface Badge {
+  id: string;
+  user_wallet: string;
+  badge_type: 'grave_keeper' | 'necromancer' | 'digital_ghost' | 'phoenix' | 'soul_shepherd' | 'master_curator';
+  revival_id: string;
+  earned_at: string;
+  claimed: boolean;
+  token_id?: string;
+  tx_hash?: string;
+}
+
+export interface BadgeInfo {
+  type: 'grave_keeper' | 'necromancer' | 'digital_ghost' | 'phoenix' | 'soul_shepherd' | 'master_curator';
+  name: string;
+  threshold: number;
+  description: string;
+  color: string;
+  icon: string;
+}
+
+export const BADGE_TIERS: BadgeInfo[] = [
+  {
+    type: 'grave_keeper',
+    name: 'Grave Keeper',
+    threshold: 10,
+    description: 'Earned 10 blessings on a revival',
+    color: 'from-gray-400 to-gray-600',
+    icon: '⚰️'
+  },
+  {
+    type: 'necromancer',
+    name: 'Necromancer',
+    threshold: 30,
+    description: 'Earned 30 blessings on a revival',
+    color: 'from-purple-400 to-purple-600',
+    icon: '🔮'
+  },
+  {
+    type: 'digital_ghost',
+    name: 'Digital Ghost',
+    threshold: 50,
+    description: 'Earned 50 blessings on a revival',
+    color: 'from-cyan-400 to-cyan-600',
+    icon: '👻'
+  },
+  {
+    type: 'phoenix',
+    name: 'Phoenix',
+    threshold: 70,
+    description: 'Earned 70 blessings on a revival',
+    color: 'from-orange-400 to-red-600',
+    icon: '🔥'
+  },
+  {
+    type: 'soul_shepherd',
+    name: 'Soul Shepherd',
+    threshold: 100,
+    description: 'Earned 100 blessings on a revival',
+    color: 'from-yellow-400 to-amber-600',
+    icon: '✨'
+  },
+  {
+    type: 'master_curator',
+    name: 'Master Curator',
+    threshold: 150,
+    description: 'Earned 150+ blessings on a revival',
+    color: 'from-pink-400 to-rose-600',
+    icon: '👑'
+  }
+];
+
+export async function blessRevival(revivalId: string, userWallet: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('revival_blessings')
+      .insert({
+        revival_id: revivalId,
+        user_wallet: userWallet
+      });
+
+    if (error) {
+      if (error.code === '23505') {
+        return { success: false, error: 'You have already blessed this revival' };
+      }
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error blessing revival:', error);
+    return { success: false, error: 'Failed to bless revival' };
+  }
+}
+
+export async function getRevivalBlessingCount(revivalId: string): Promise<number> {
+  try {
+    const { data, error } = await supabase
+      .rpc('get_revival_blessing_count', { p_revival_id: revivalId });
+
+    if (error) throw error;
+    return data || 0;
+  } catch (error) {
+    console.error('Error getting blessing count:', error);
+    return 0;
+  }
+}
+
+export async function userHasBlessedRevival(revivalId: string, userWallet: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .rpc('user_has_blessed_revival', {
+        p_revival_id: revivalId,
+        p_user_wallet: userWallet
+      });
+
+    if (error) throw error;
+    return data || false;
+  } catch (error) {
+    console.error('Error checking if user blessed revival:', error);
+    return false;
+  }
+}
+
+export async function getUserBadges(userWallet: string): Promise<Badge[]> {
+  try {
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select('*')
+      .eq('user_wallet', userWallet)
+      .order('earned_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching user badges:', error);
+    return [];
+  }
+}
+
+export async function getUnclaimedBadges(userWallet: string): Promise<Badge[]> {
+  try {
+    const { data, error } = await supabase
+      .from('user_badges')
+      .select('*')
+      .eq('user_wallet', userWallet)
+      .eq('claimed', false)
+      .order('earned_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching unclaimed badges:', error);
+    return [];
+  }
+}
+
+export async function markBadgeAsClaimed(
+  badgeId: string,
+  tokenId: string,
+  txHash: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('user_badges')
+      .update({
+        claimed: true,
+        token_id: tokenId,
+        tx_hash: txHash
+      })
+      .eq('id', badgeId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Error marking badge as claimed:', error);
+    return { success: false, error: 'Failed to update badge status' };
+  }
+}
+
+export function getBadgeInfo(badgeType: string): BadgeInfo | undefined {
+  return BADGE_TIERS.find(tier => tier.type === badgeType);
+}
+
+export function getNextBadgeTier(currentBlessings: number): BadgeInfo | null {
+  for (const tier of BADGE_TIERS) {
+    if (currentBlessings < tier.threshold) {
+      return tier;
+    }
+  }
+  return null;
+}
+
+export function getCurrentBadgeTier(currentBlessings: number): BadgeInfo | null {
+  const sortedTiers = [...BADGE_TIERS].reverse();
+  for (const tier of sortedTiers) {
+    if (currentBlessings >= tier.threshold) {
+      return tier;
+    }
+  }
+  return null;
+}

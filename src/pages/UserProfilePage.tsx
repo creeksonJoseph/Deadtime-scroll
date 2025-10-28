@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Camera, Edit2, Save, X } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
 import { profileService } from '../services/profileService';
+import { getUserBadges, getUnclaimedBadges, Badge } from '../services/blessingService';
+import BadgeDisplay from '../components/BadgeDisplay';
+import Toast from '../components/Toast';
 
 export default function UserProfilePage() {
   const { profile, walletAddress } = useWallet();
@@ -11,6 +14,10 @@ export default function UserProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -20,6 +27,18 @@ export default function UserProfilePage() {
       setAvatarUrl(profile.avatar_url || '');
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (walletAddress) {
+      loadBadges();
+    }
+  }, [walletAddress]);
+
+  const loadBadges = async () => {
+    if (!walletAddress) return;
+    const userBadges = await getUserBadges(walletAddress);
+    setBadges(userBadges);
+  };
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -87,6 +106,12 @@ export default function UserProfilePage() {
       setAvatarUrl(profile.avatar_url || '');
     }
     setIsEditing(false);
+  };
+
+  const handleClaimBadge = async (badge: Badge) => {
+    setToastMessage('NFT minting feature coming soon! Connect your contract address to enable minting.');
+    setToastType('success');
+    setShowToast(true);
   };
 
   if (!profile) {
@@ -208,7 +233,7 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
             <h3 className="text-zinc-400 text-sm font-semibold mb-2">Total Blessings</h3>
             <p className="text-primary text-3xl font-bold">{profile.total_blessings}</p>
@@ -223,8 +248,20 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-    
+        <BadgeDisplay
+          badges={badges}
+          onClaimBadge={handleClaimBadge}
+          isOwnProfile={true}
+        />
       </div>
+
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 }

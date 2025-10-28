@@ -1,20 +1,31 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Sparkles, GitBranch } from 'lucide-react';
+import { Sparkles, GitBranch, Heart } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { Revival } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
+import { useWallet } from '../contexts/WalletContext';
+import { blessRevival, getRevivalBlessingCount, userHasBlessedRevival, getNextBadgeTier, getCurrentBadgeTier } from '../services/blessingService';
+import Toast from '../components/Toast';
 
 export default function RevivalDetailPage() {
   const { revivalId } = useParams();
+  const { walletAddress, isConnected } = useWallet();
   const [revival, setRevival] = useState<Revival | null>(null);
   const [loading, setLoading] = useState(true);
+  const [blessingCount, setBlessingCount] = useState(0);
+  const [hasBlessed, setHasBlessed] = useState(false);
+  const [isBlessing, setIsBlessing] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     if (revivalId) {
       loadRevival();
+      loadBlessingData();
     }
-  }, [revivalId]);
+  }, [revivalId, walletAddress]);
 
   const loadRevival = async () => {
     try {
@@ -26,6 +37,56 @@ export default function RevivalDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadBlessingData = async () => {
+    if (!revivalId) return;
+
+    const count = await getRevivalBlessingCount(revivalId);
+    setBlessingCount(count);
+
+    if (walletAddress) {
+      const blessed = await userHasBlessedRevival(revivalId, walletAddress);
+      setHasBlessed(blessed);
+    }
+  };
+
+  const handleBless = async () => {
+    if (!isConnected || !walletAddress) {
+      setToastMessage('Please connect your wallet first');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    if (hasBlessed) {
+      setToastMessage('You have already blessed this revival');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    setIsBlessing(true);
+    const result = await blessRevival(revivalId!, walletAddress);
+
+    if (result.success) {
+      setHasBlessed(true);
+      await loadBlessingData();
+
+      const currentTier = getCurrentBadgeTier(blessingCount + 1);
+      if (currentTier) {
+        setToastMessage(`Blessing added! Revival now has ${blessingCount + 1} blessings. ${currentTier.name} badge progress!`);
+      } else {
+        setToastMessage('Blessing added successfully!');
+      }
+      setToastType('success');
+    } else {
+      setToastMessage(result.error || 'Failed to add blessing');
+      setToastType('error');
+    }
+
+    setShowToast(true);
+    setIsBlessing(false);
   };
 
   if (loading) {
@@ -91,22 +152,77 @@ export default function RevivalDetailPage() {
 
         <div className="border-t border-zinc-gray/50 py-6 mb-12">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
+            <div className="flex-1">
               <h3 className="text-zinc-gray text-xl font-bold mb-2">Bless this Revival</h3>
-              <p className="text-zinc-gray text-sm">Show your support and help this project gain visibility.</p>
+              <p className="text-zinc-gray text-sm mb-3">Show your support and help this project gain visibility.</p>
+
+              {blessingCount > 0 && (
+                <div className="space-y-2">
+                  {getCurrentBadgeTier(blessingCount) && (
+                    <p className="text-sm text-primary font-semibold">
+                      Current Tier: {getCurrentBadgeTier(blessingCount)?.name} {getCurrentBadgeTier(blessingCount)?.icon}
+                    </p>
+                  )}
+                  {getNextBadgeTier(blessingCount) && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-400">
+                        Next: {getNextBadgeTier(blessingCount)?.name} at {getNextBadgeTier(blessingCount)?.threshold} blessings
+                      </p>
+                      <div className="w-full bg-dark-card rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min((blessingCount / (getNextBadgeTier(blessingCount)?.threshold || 1)) * 100, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 bg-primary text-background-dark px-6 py-3 text-lg font-bold hover:bg-primary/80">
-                <Sparkles />
-                <span>Bless</span>
+              <button
+                onClick={handleBless}
+                disabled={!isConnected || hasBlessed || isBlessing}
+                className={`flex items-center gap-2 px-6 py-3 text-lg font-bold transition-all ${
+                  hasBlessed
+                    ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                    : isBlessing
+                    ? 'bg-primary/50 text-background-dark cursor-wait'
+                    : 'bg-primary text-background-dark hover:bg-primary/80'
+                }`}
+              >
+                {hasBlessed ? (
+                  <>
+                    <Heart className="w-5 h-5 fill-current" />
+                    <span>Blessed</span>
+                  </>
+                ) : isBlessing ? (
+                  <>
+                    <Sparkles className="w-5 h-5 animate-spin" />
+                    <span>Blessing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    <span>Bless</span>
+                  </>
+                )}
               </button>
-              <p className="text-primary text-lg font-bold">Total Blessings: {revival.blessing_count}</p>
+              <p className="text-primary text-lg font-bold">{blessingCount} Blessings</p>
             </div>
           </div>
         </div>
 
         <CommentSection revivalId={revival.id} initialCount={revival.comment_count} />
       </div>
+
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 }
