@@ -5,25 +5,25 @@ const timelineEvents = [
   {
     icon: GitBranch,
     title: 'Project Discovery',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Developers find abandoned projects with potential for revival.',
+    description: 'A developer with a brilliant idea but limited means can post it on the platform, giving it a second chance at life. Other developers can then discover these abandoned yet promising projects, pick them up, and revive them into something great.',
     date: 'Phase 1'
   },
   {
     icon: Code2,
     title: 'Initial Revival',
-    description: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Code assessment and modernization begins.',
+    description: 'Other developers can chat directly with the original creator to gain deeper insights and fully understand the project’s vision. Once aligned, the code assessment and modernization process begins, breathing new life into what was once left behind.',
     date: 'Phase 2'
   },
   {
     icon: Heart,
     title: 'Community Support',
-    description: 'Ut enim ad minim veniam, quis nostrud exercitation. Blessings flow in as the community rallies behind the revival.',
+    description: 'he developer then dives into the revival, sharing regular progress updates as the project evolves. The community reviews, supports, and blesses each milestone - and as the revival gains momentum, blessings flow in, symbolizing encouragement and appreciation from fellow developers who believe in the comeback.',
     date: 'Phase 3'
   },
   {
     icon: Rocket,
     title: 'Project Launch',
-    description: 'Duis aute irure dolor in reprehenderit. The revived project goes live, inspiring new resurrection cycles.',
+    description: 'The revived project finally goes live, standing as proof that no idea is ever truly lost - and in doing so, it sparks new waves of inspiration, fueling the next cycle of revivals across the community.',
     date: 'Phase 4'
   }
 ];
