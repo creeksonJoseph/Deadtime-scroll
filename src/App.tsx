@@ -15,6 +15,7 @@ import MyRevivalsPage from './pages/MyRevivalsPage';
 import BloodlinePage from './pages/BloodlinePage';
 import ReviveProjectPage from './pages/ReviveProjectPage';
 
+
 function App() {
   console.log('App component mounting...');
 
@@ -41,6 +42,7 @@ function App() {
               <Route path="/chat" element={<ChatPage />} />
             </Route>
           </Routes>
+
         </div>
       </WalletProvider>
     </Router>

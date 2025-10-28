@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Code, RefreshCw, Sparkles, GitBranch } from 'lucide-react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Code, RefreshCw, Sparkles, GitBranch, ArrowLeft } from 'lucide-react';
 import { projectService } from '../services/projectService';
 import { Project } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
@@ -9,6 +9,7 @@ import { useWallet } from '../contexts/WalletContext';
 export default function ProjectDetailPage() {
   const { projectId } = useParams();
   const { isConnected } = useWallet();
+  const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +50,15 @@ export default function ProjectDetailPage() {
   return (
     <div className="bg-background-dark min-h-screen p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="group flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors mb-6 bg-zinc-900/50 hover:bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-800 hover:border-primary/30"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-medium">Back</span>
+        </button>
+        
         <div className="mb-8">
           <p className="text-white text-4xl md:text-5xl font-black mb-4">
             {project.name}
@@ -105,13 +115,13 @@ export default function ProjectDetailPage() {
               <span>View Repository</span>
             </a>
           )}
-          <Link
+          {/* <Link
             to={`/projects/${projectId}/revivals`}
             className="inline-flex items-center gap-2 border border-primary text-primary px-4 py-2 hover:bg-primary hover:text-black transition-colors font-bold"
           >
             <GitBranch className="w-5 h-5" />
             <span>View Bloodline</span>
-          </Link>
+          </Link> */}
           {isConnected && (
             <Link
               to={`/projects/${projectId}/revive`}

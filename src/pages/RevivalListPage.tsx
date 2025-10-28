@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { Revival } from '../lib/supabase';
 
 export default function RevivalListPage() {
   const { projectId } = useParams();
+  const navigate = useNavigate();
   const [revivals, setRevivals] = useState<Revival[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +39,15 @@ export default function RevivalListPage() {
   return (
     <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="group flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors mb-6 bg-zinc-900/50 hover:bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-800 hover:border-primary/30"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-medium">Back</span>
+        </button>
+        
         <h1 className="text-primary text-4xl font-black mb-8">Project Revivals</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {revivals.map((revival) => (

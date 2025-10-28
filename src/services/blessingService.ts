@@ -80,20 +80,22 @@ export const BADGE_TIERS: BadgeInfo[] = [
 
 export async function blessRevival(revivalId: string, userWallet: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase
-      .from('revival_blessings')
-      .insert({
-        revival_id: revivalId,
-        user_wallet: userWallet
-      });
+    // Check if user already blessed this revival
+    const blessedKey = `blessed_revival_${revivalId}_${userWallet}`;
+    if (localStorage.getItem(blessedKey) === 'true') {
+      return { success: false, error: 'You cannot bless a project twice' };
+    }
+
+    const { error } = await supabase.rpc('increment_revival_blessings', {
+      revival_id_param: revivalId
+    });
 
     if (error) {
-      if (error.code === '23505') {
-        return { success: false, error: 'You have already blessed this revival' };
-      }
       throw error;
     }
 
+    // Mark as blessed locally
+    localStorage.setItem(blessedKey, 'true');
     return { success: true };
   } catch (error) {
     console.error('Error blessing revival:', error);
@@ -104,10 +106,13 @@ export async function blessRevival(revivalId: string, userWallet: string): Promi
 export async function getRevivalBlessingCount(revivalId: string): Promise<number> {
   try {
     const { data, error } = await supabase
-      .rpc('get_revival_blessing_count', { p_revival_id: revivalId });
+      .from('revivals')
+      .select('blessing_count')
+      .eq('id', revivalId)
+      .single();
 
     if (error) throw error;
-    return data || 0;
+    return data?.blessing_count || 0;
   } catch (error) {
     console.error('Error getting blessing count:', error);
     return 0;
@@ -116,14 +121,8 @@ export async function getRevivalBlessingCount(revivalId: string): Promise<number
 
 export async function userHasBlessedRevival(revivalId: string, userWallet: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase
-      .rpc('user_has_blessed_revival', {
-        p_revival_id: revivalId,
-        p_user_wallet: userWallet
-      });
-
-    if (error) throw error;
-    return data || false;
+    const blessedKey = `blessed_revival_${revivalId}_${userWallet}`;
+    return localStorage.getItem(blessedKey) === 'true';
   } catch (error) {
     console.error('Error checking if user blessed revival:', error);
     return false;

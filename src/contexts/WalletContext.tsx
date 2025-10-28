@@ -40,6 +40,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('Error checking connection:', err);
+      // Clear potentially corrupted cache data
+      localStorage.removeItem('walletAddress');
       setError(err instanceof Error ? err.message : 'Failed to check connection');
     } finally {
       setLoading(false);

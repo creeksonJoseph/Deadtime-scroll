@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Sparkles, Info } from 'lucide-react';
+import { Sparkles, Info, ArrowLeft } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { projectService } from '../services/projectService';
 import { useWallet } from '../contexts/WalletContext';
@@ -116,6 +116,15 @@ export default function ReviveProjectPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="group flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors mb-6 bg-zinc-900/50 hover:bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-800 hover:border-primary/30"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Back</span>
+      </button>
+      
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="w-10 h-10 text-primary" />

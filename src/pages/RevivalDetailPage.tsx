@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Sparkles, GitBranch, Heart } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Sparkles, GitBranch, Heart, ArrowLeft } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { Revival } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
@@ -10,7 +10,8 @@ import Toast from '../components/Toast';
 
 export default function RevivalDetailPage() {
   const { revivalId } = useParams();
-  const { walletAddress, isConnected } = useWallet();
+  const { profile, isConnected } = useWallet();
+  const navigate = useNavigate();
   const [revival, setRevival] = useState<Revival | null>(null);
   const [loading, setLoading] = useState(true);
   const [blessingCount, setBlessingCount] = useState(0);
@@ -25,7 +26,7 @@ export default function RevivalDetailPage() {
       loadRevival();
       loadBlessingData();
     }
-  }, [revivalId, walletAddress]);
+  }, [revivalId, profile]);
 
   const loadRevival = async () => {
     try {
@@ -45,14 +46,14 @@ export default function RevivalDetailPage() {
     const count = await getRevivalBlessingCount(revivalId);
     setBlessingCount(count);
 
-    if (walletAddress) {
-      const blessed = await userHasBlessedRevival(revivalId, walletAddress);
+    if (profile?.wallet_address) {
+      const blessed = await userHasBlessedRevival(revivalId, profile.wallet_address);
       setHasBlessed(blessed);
     }
   };
 
   const handleBless = async () => {
-    if (!isConnected || !walletAddress) {
+    if (!isConnected || !profile?.wallet_address) {
       setToastMessage('Please connect your wallet first');
       setToastType('error');
       setShowToast(true);
@@ -67,18 +68,12 @@ export default function RevivalDetailPage() {
     }
 
     setIsBlessing(true);
-    const result = await blessRevival(revivalId!, walletAddress);
+    const result = await blessRevival(revivalId!, profile!.wallet_address);
 
     if (result.success) {
       setHasBlessed(true);
       await loadBlessingData();
-
-      const currentTier = getCurrentBadgeTier(blessingCount + 1);
-      if (currentTier) {
-        setToastMessage(`Blessing added! Revival now has ${blessingCount + 1} blessings. ${currentTier.name} badge progress!`);
-      } else {
-        setToastMessage('Blessing added successfully!');
-      }
+      setToastMessage('You blessed the project successfully!');
       setToastType('success');
     } else {
       setToastMessage(result.error || 'Failed to add blessing');
@@ -108,6 +103,15 @@ export default function RevivalDetailPage() {
   return (
     <div className="p-4 md:p-10">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="group flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors mb-6 bg-zinc-900/50 hover:bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-800 hover:border-primary/30"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-medium">Back</span>
+        </button>
+        
         <div className="mb-6">
           <h1 className="text-zinc-gray text-5xl font-bold mb-2">{revival.title}</h1>
           {revival.profiles && (
@@ -141,13 +145,13 @@ export default function RevivalDetailPage() {
               Live Site
             </a>
           )}
-          <Link
+          {/* <Link
             to={`/revivals/${revival.id}/bloodline`}
             className="flex items-center gap-2 bg-gradient-to-r from-primary to-cyan-500 text-black px-6 py-3 font-bold hover:from-primary/80 hover:to-cyan-500/80 transition-all"
           >
             <GitBranch className="w-5 h-5" />
             View Bloodline
-          </Link>
+          </Link> */}
         </div>
 
         <div className="mb-8">
@@ -225,6 +229,7 @@ export default function RevivalDetailPage() {
         <Toast
           message={toastMessage}
           type={toastType}
+          visible={showToast}
           onClose={() => setShowToast(false)}
         />
       )}
