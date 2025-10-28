@@ -5,6 +5,8 @@ import { revivalService } from '../services/revivalService';
 import { projectService } from '../services/projectService';
 import { useWallet } from '../contexts/WalletContext';
 import { Project } from '../lib/supabase';
+import Notification from '../components/Notification';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function ReviveProjectPage() {
   const navigate = useNavigate();
@@ -12,6 +14,13 @@ export default function ReviveProjectPage() {
   const { isConnected, profile } = useWallet();
   const [loading, setLoading] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info' | 'warning';
+    title: string;
+    message?: string;
+  } | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [createdRevivalId, setCreatedRevivalId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -41,7 +50,20 @@ export default function ReviveProjectPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!isConnected || !profile || !projectId) {
-      alert('Please connect your wallet first');
+      setNotification({
+        type: 'error',
+        title: 'Wallet Not Connected',
+        message: 'Please connect your wallet to revive a project',
+      });
+      return;
+    }
+
+    if (!formData.title.trim()) {
+      setNotification({
+        type: 'error',
+        title: 'Title Required',
+        message: 'Please provide a title for your revival',
+      });
       return;
     }
 
@@ -54,11 +76,15 @@ export default function ReviveProjectPage() {
         github_url: formData.github_url || undefined,
         deployed_url: formData.deployed_url || undefined,
       });
-      alert('Revival registered successfully! You can update the details anytime from My Revivals page.');
-      navigate('/my-revivals');
+      setCreatedRevivalId(revival.id);
+      setShowConfirmModal(true);
     } catch (error) {
       console.error('Error creating revival:', error);
-      alert('Failed to create revival');
+      setNotification({
+        type: 'error',
+        title: 'Revival Failed',
+        message: 'Failed to create revival. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
@@ -206,6 +232,24 @@ export default function ReviveProjectPage() {
           </button>
         </div>
       </form>
+
+      {notification && (
+        <Notification
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => {
+          setShowConfirmModal(false);
+          navigate('/my-revivals');
+        }}
+        revivalId={createdRevivalId || undefined}
+      />
     </div>
   );
 }

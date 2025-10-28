@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { projectService } from '../services/projectService';
 import { useWallet } from '../contexts/WalletContext';
+import Notification from '../components/Notification';
 
 const categories = ['Music', 'Gaming', 'Tech', 'Art', 'Education', 'Finance', 'Other'];
 
@@ -9,6 +10,11 @@ export default function SubmitProjectPage() {
   const navigate = useNavigate();
   const { isConnected } = useWallet();
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'info' | 'warning';
+    title: string;
+    message?: string;
+  } | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -20,12 +26,20 @@ export default function SubmitProjectPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!isConnected) {
-      alert('Please connect your wallet first');
+      setNotification({
+        type: 'error',
+        title: 'Wallet Not Connected',
+        message: 'Please connect your wallet to submit a project',
+      });
       return;
     }
 
     if (!formData.repo_url.trim()) {
-      alert('GitHub repository URL is required');
+      setNotification({
+        type: 'error',
+        title: 'Repository Required',
+        message: 'GitHub repository URL is required',
+      });
       return;
     }
 
@@ -38,11 +52,21 @@ export default function SubmitProjectPage() {
         repo_url: formData.repo_url,
         deployed_url: formData.deployed_url || undefined,
       });
-      alert('Project submitted successfully!');
-      navigate(`/projects/${project.id}`);
+      setNotification({
+        type: 'success',
+        title: 'Project Submitted!',
+        message: 'Your project has been successfully registered',
+      });
+      setTimeout(() => {
+        navigate(`/projects/${project.id}`);
+      }, 1500);
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Failed to create project');
+      setNotification({
+        type: 'error',
+        title: 'Submission Failed',
+        message: 'Failed to create project. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
@@ -163,6 +187,15 @@ export default function SubmitProjectPage() {
           {loading ? 'Submitting...' : 'Submit Project'}
         </button>
       </form>
+
+      {notification && (
+        <Notification
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }
