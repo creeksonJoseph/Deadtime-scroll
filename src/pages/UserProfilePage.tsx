@@ -223,25 +223,7 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-lg p-6">
-          <h3 className="text-white text-xl font-bold mb-4">Change Profile Photo</h3>
-          <p className="text-zinc-400 mb-4">
-            Click on your profile photo above to upload a new image. Supported formats: JPG, PNG, GIF. Max size: 5MB.
-          </p>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleAvatarClick}
-              disabled={isUploading}
-              className="flex items-center gap-2 bg-primary text-black px-6 py-3 font-bold hover:bg-primary/80 transition-colors disabled:opacity-50"
-            >
-              <Camera className="w-4 h-4" />
-              {isUploading ? 'Uploading...' : 'Upload Photo'}
-            </button>
-            <span className="text-zinc-500 text-sm">
-              Or paste an image URL in edit mode
-            </span>
-          </div>
-        </div>
+    
       </div>
     </div>
   );
