@@ -202,19 +202,16 @@ export default function HomePage() {
               className="text-center text-gray-300 leading-relaxed mb-6"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              DeadTime is a platform for developers to breathe new life into forgotten projects. 
-              Track revivals, share progress, and connect through blessings — where effort meets resurrection.
+              DeadTime is a resurrection hub for abandoned ideas - a place where developers can breathe new life into forgotten codebases. Every project revival tells a story of persistence and creativity. Share your rebuild journey, track your progress, and earn blessings from the community as a sign of support and recognition.
             </p>
             
             <p 
               className="text-center text-gray-400 leading-relaxed"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt 
-              ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-              laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
-              voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+             Each blessing pushes your project closer to greatness — and once you’ve gathered enough, you’ll unlock exclusive NFT badges that showcase your dedication and impact. Beyond the code, DeadTime thrives on collaboration. Through community comments and feedback, you’ll get real-time motivation, ideas, and guidance from fellow builders walking the same path.
             </p>
+          
 
             <div className="w-16 h-1 bg-[#39FF14] mt-8 mx-auto" style={{ boxShadow: '0 0 10px #39FF14' }} />
           </div>
