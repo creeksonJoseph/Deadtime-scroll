@@ -71,6 +71,7 @@ export default function ReviveProjectPage() {
       setLoading(true);
       const revival = await revivalService.create({
         project_id: projectId,
+        reviver_id: profile!.id,
         title: formData.title,
         description: formData.description,
         github_url: formData.github_url || undefined,
@@ -83,7 +84,7 @@ export default function ReviveProjectPage() {
       setNotification({
         type: 'error',
         title: 'Revival Failed',
-        message: 'Failed to create revival. Please try again.',
+        message: error instanceof Error ? error.message : 'Failed to create revival. Please try again.',
       });
     } finally {
       setLoading(false);

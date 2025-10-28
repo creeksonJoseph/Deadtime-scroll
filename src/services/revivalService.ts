@@ -41,19 +41,11 @@ export const revivalService = {
     explanation_uri?: string;
     deployed_url?: string;
     github_url?: string;
+    reviver_id?: string;
   }) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('wallet_address', (await supabase.auth.getUser()).data.user?.id)
-      .single();
-
     const { data, error } = await supabase
       .from('revivals')
-      .insert({
-        ...revival,
-        reviver_id: profile?.id,
-      })
+      .insert(revival)
       .select()
       .single();
 
