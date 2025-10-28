@@ -17,7 +17,7 @@ const timelineEvents = [
   {
     icon: Heart,
     title: 'Community Support',
-    description: 'he developer then dives into the revival, sharing regular progress updates as the project evolves. The community reviews, supports, and blesses each milestone - and as the revival gains momentum, blessings flow in, symbolizing encouragement and appreciation from fellow developers who believe in the comeback.',
+    description: 'The developer then dives into the revival, sharing regular progress updates as the project evolves. The community reviews, supports, and blesses each milestone - and as the revival gains momentum, blessings flow in, symbolizing encouragement and appreciation from fellow developers who believe in the comeback.',
     date: 'Phase 3'
   },
   {
