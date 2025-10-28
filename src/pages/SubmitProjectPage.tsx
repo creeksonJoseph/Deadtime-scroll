@@ -8,7 +8,7 @@ const categories = ['Music', 'Gaming', 'Tech', 'Art', 'Education', 'Finance', 'O
 
 export default function SubmitProjectPage() {
   const navigate = useNavigate();
-  const { isConnected } = useWallet();
+  const { isConnected, profile } = useWallet();
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info' | 'warning';
@@ -25,7 +25,7 @@ export default function SubmitProjectPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!isConnected) {
+    if (!isConnected || !profile) {
       setNotification({
         type: 'error',
         title: 'Wallet Not Connected',
@@ -51,6 +51,7 @@ export default function SubmitProjectPage() {
         category: formData.category,
         repo_url: formData.repo_url,
         deployed_url: formData.deployed_url || undefined,
+        creator_id: profile.id,
       });
       setNotification({
         type: 'success',

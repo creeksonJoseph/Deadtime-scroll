@@ -98,7 +98,7 @@ export default function ProjectListPage() {
                 <div className="border-t border-zinc-700 pt-4">
                   {project.profiles && (
                     <Link
-                      to={`/profile/${project.submitter_wallet}`}
+                      to={`/profile/${project.profiles.wallet_address}`}
                       className="flex items-start gap-3 mb-3 hover:opacity-80 transition-opacity group"
                     >
                       <img
@@ -108,13 +108,30 @@ export default function ProjectListPage() {
                       />
                       <div>
                         <p className="font-bold text-sm text-zinc-300 group-hover:text-[#00ff90] transition-colors">
-                          {project.profiles.username}
+                          {project.profiles.username || 'Anonymous'}
                         </p>
                         <p className="text-sm text-zinc-500">
-                          {project.revival_count} revival{project.revival_count !== 1 ? 's' : ''}
+                          Submitted {new Date(project.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </Link>
+                  )}
+                  {!project.profiles && (
+                    <div className="flex items-start gap-3 mb-3">
+                      <img
+                        className="w-8 h-8 object-cover rounded-full border-2 border-zinc-700"
+                        alt="User avatar"
+                        src="https://via.placeholder.com/32"
+                      />
+                      <div>
+                        <p className="font-bold text-sm text-zinc-500">
+                          Anonymous
+                        </p>
+                        <p className="text-sm text-zinc-500">
+                          Submitted {new Date(project.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
                   )}
                   <Link
                     to={`/projects/${project.id}`}

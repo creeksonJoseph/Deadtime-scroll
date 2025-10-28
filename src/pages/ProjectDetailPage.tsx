@@ -56,7 +56,7 @@ export default function ProjectDetailPage() {
           <div className="flex items-center gap-4 flex-wrap">
             {project.profiles && (
               <Link
-                to={`/profile/${project.submitter_wallet}`}
+                to={`/profile/${project.profiles.wallet_address}`}
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
               >
                 <img
@@ -66,9 +66,22 @@ export default function ProjectDetailPage() {
                 />
                 <div>
                   <p className="text-zinc-400 text-sm">Created by</p>
-                  <p className="text-white font-bold group-hover:text-primary transition-colors">{project.profiles.username}</p>
+                  <p className="text-white font-bold group-hover:text-primary transition-colors">{project.profiles.username || 'Anonymous'}</p>
                 </div>
               </Link>
+            )}
+            {!project.profiles && (
+              <div className="flex items-center gap-2">
+                <img
+                  className="w-10 h-10 object-cover rounded-full border-2 border-zinc-700"
+                  alt="Creator avatar"
+                  src="https://via.placeholder.com/40"
+                />
+                <div>
+                  <p className="text-zinc-400 text-sm">Created by</p>
+                  <p className="text-zinc-500 font-bold">Anonymous</p>
+                </div>
+              </div>
             )}
             <div className="flex items-center gap-2">
               <RefreshCw className="text-primary" />

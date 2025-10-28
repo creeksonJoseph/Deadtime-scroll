@@ -37,18 +37,12 @@ export const projectService = {
     description: string;
     category: string;
     repo_url?: string;
+    creator_id?: string;
   }) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('wallet_address', (await supabase.auth.getUser()).data.user?.id)
-      .single();
-
     const { data, error } = await supabase
       .from('projects')
       .insert({
         ...project,
-        creator_id: profile?.id,
       })
       .select()
       .single();
