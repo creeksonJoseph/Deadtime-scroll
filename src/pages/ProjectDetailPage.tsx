@@ -144,14 +144,7 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
-        <div className="flex justify-center mb-12">
-          <Link
-            to={`/projects/${project.id}/revivals`}
-            className="bg-primary text-black px-8 py-3 text-lg font-bold hover:bg-primary/80 transition-colors"
-          >
-            ✨ Revive This Project
-          </Link>
-        </div>
+        
 
         <CommentSection projectId={project.id} initialCount={project.comment_count} />
       </div>
