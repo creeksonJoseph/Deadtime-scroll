@@ -7,6 +7,7 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import RevivalListPage from './pages/RevivalListPage';
 import RevivalDetailPage from './pages/RevivalDetailPage';
 import UserProfilePage from './pages/UserProfilePage';
+import PublicProfilePage from './pages/PublicProfilePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import ChatPage from './pages/ChatPage';
 import SubmitProjectPage from './pages/SubmitProjectPage';
@@ -35,6 +36,7 @@ function App() {
               <Route path="/revivals" element={<MyRevivalsPage />} />
               <Route path="/my-revivals" element={<MyRevivalsPage />} />
               <Route path="/profile" element={<UserProfilePage />} />
+              <Route path="/profile/:walletAddress" element={<PublicProfilePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/chat" element={<ChatPage />} />
             </Route>

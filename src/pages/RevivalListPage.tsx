@@ -45,7 +45,12 @@ export default function RevivalListPage() {
               <div>
                 <h2 className="text-white text-xl font-bold mb-2">{revival.title}</h2>
                 {revival.profiles && (
-                  <p className="text-zinc-gray text-sm mb-2">By {revival.profiles.username}</p>
+                  <Link
+                    to={`/profile/${revival.reviver_wallet}`}
+                    className="text-zinc-gray text-sm mb-2 hover:text-primary transition-colors inline-block"
+                  >
+                    By {revival.profiles.username}
+                  </Link>
                 )}
                 <p className="text-zinc-gray text-base line-clamp-3">{revival.description}</p>
                 <div className="flex items-center gap-2 mt-4">

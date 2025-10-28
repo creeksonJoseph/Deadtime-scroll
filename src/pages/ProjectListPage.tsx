@@ -97,21 +97,24 @@ export default function ProjectListPage() {
                 </div>
                 <div className="border-t border-zinc-700 pt-4">
                   {project.profiles && (
-                    <div className="flex items-start gap-3 mb-3">
+                    <Link
+                      to={`/profile/${project.submitter_wallet}`}
+                      className="flex items-start gap-3 mb-3 hover:opacity-80 transition-opacity group"
+                    >
                       <img
-                        className="w-8 h-8 object-cover"
+                        className="w-8 h-8 object-cover rounded-full border-2 border-transparent group-hover:border-[#00ff90] transition-colors"
                         alt="User avatar"
                         src={project.profiles.avatar_url || 'https://via.placeholder.com/32'}
                       />
                       <div>
-                        <p className="font-bold text-sm text-zinc-300">
+                        <p className="font-bold text-sm text-zinc-300 group-hover:text-[#00ff90] transition-colors">
                           {project.profiles.username}
                         </p>
                         <p className="text-sm text-zinc-500">
                           {project.revival_count} revival{project.revival_count !== 1 ? 's' : ''}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   )}
                   <Link
                     to={`/projects/${project.id}`}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Heart, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { profileService } from '../services/profileService';
 import { Profile } from '../lib/supabase';
 
@@ -51,17 +52,20 @@ export default function LeaderboardPage() {
             </thead>
             <tbody>
               {profiles.map((profile, index) => (
-                <tr key={profile.id} className="border-b border-zinc-700 hover:border-neon-green hover:border-l-4 cursor-pointer group">
+                <tr key={profile.id} className="border-b border-zinc-700 hover:border-neon-green hover:border-l-4 group">
                   <td className="px-4 py-4 text-neon-green text-lg font-bold">{index + 1}</td>
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
+                    <Link
+                      to={`/profile/${profile.wallet_address}`}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
                       <img
-                        className="w-10 h-10 border border-zinc-700"
+                        className="w-10 h-10 border border-zinc-700 rounded-full group-hover:border-neon-green transition-colors"
                         alt={profile.username || 'User'}
                         src={profile.avatar_url || 'https://via.placeholder.com/40'}
                       />
-                      <span className="text-zinc-400 text-sm group-hover:text-neon-green">{profile.username}</span>
-                    </div>
+                      <span className="text-zinc-400 text-sm group-hover:text-neon-green transition-colors">{profile.username}</span>
+                    </Link>
                   </td>
                   <td className="px-4 py-4 text-zinc-400 text-sm">
                     <div className="flex items-center gap-2">
