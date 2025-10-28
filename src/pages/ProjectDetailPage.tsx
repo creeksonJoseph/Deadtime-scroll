@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Code, RefreshCw, Sparkles } from 'lucide-react';
+import { Code, RefreshCw, Sparkles, GitBranch } from 'lucide-react';
 import { projectService } from '../services/projectService';
 import { Project } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
@@ -55,17 +55,20 @@ export default function ProjectDetailPage() {
           </p>
           <div className="flex items-center gap-4 flex-wrap">
             {project.profiles && (
-              <div className="flex items-center gap-2">
+              <Link
+                to={`/profile/${project.submitter_wallet}`}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
+              >
                 <img
-                  className="w-10 h-10 object-cover"
+                  className="w-10 h-10 object-cover rounded-full border-2 border-transparent group-hover:border-primary transition-colors"
                   alt="Creator avatar"
                   src={project.profiles.avatar_url || 'https://via.placeholder.com/40'}
                 />
                 <div>
                   <p className="text-zinc-400 text-sm">Created by</p>
-                  <p className="text-white font-bold">{project.profiles.username}</p>
+                  <p className="text-white font-bold group-hover:text-primary transition-colors">{project.profiles.username}</p>
                 </div>
-              </div>
+              </Link>
             )}
             <div className="flex items-center gap-2">
               <RefreshCw className="text-primary" />
@@ -89,6 +92,13 @@ export default function ProjectDetailPage() {
               <span>View Repository</span>
             </a>
           )}
+          <Link
+            to={`/projects/${projectId}/revivals`}
+            className="inline-flex items-center gap-2 border border-primary text-primary px-4 py-2 hover:bg-primary hover:text-black transition-colors font-bold"
+          >
+            <GitBranch className="w-5 h-5" />
+            <span>View Bloodline</span>
+          </Link>
           {isConnected && (
             <Link
               to={`/projects/${projectId}/revive`}
