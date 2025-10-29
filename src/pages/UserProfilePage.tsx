@@ -2,15 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Camera, Edit2, Save, X } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
 import { profileService } from '../services/profileService';
-import { getUserBadges, Badge, getCurrentBadgeTier } from '../services/blessingService';
-import { useWeb3 } from '../hooks/useWeb3';
-import { claimNFTBadge } from '../services/nftService';
+import { getUserBadges, Badge, getCurrentBadgeTier, markBadgeAsClaimed } from '../services/blessingService';
+import { claimNFTBadgeGasless } from '../services/gaslessNftService';
 import BadgeDisplay from '../components/BadgeDisplay';
 import Toast from '../components/Toast';
 
 export default function UserProfilePage() {
   const { profile } = useWallet();
-  const { contract, isConnected: isWeb3Connected, connectWallet } = useWeb3();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -112,32 +110,28 @@ export default function UserProfilePage() {
   };
 
   const handleClaimBadge = async (badge: Badge) => {
-    if (!isWeb3Connected || !contract) {
-      const connected = await connectWallet();
-      if (!connected) {
-        setToastMessage('Please connect your Web3 wallet to claim NFT badges');
-        setToastType('error');
-        setShowToast(true);
-        return;
-      }
-    }
-
     try {
-      setToastMessage('Claiming NFT Badge... Transaction will be paid by the platform!');
+      setToastMessage('Claiming NFT Badge... Platform is paying gas fees!');
       setToastType('success');
       setShowToast(true);
       
       // Get user's total blessings for this revival
       const blessings = profile?.total_blessings || 1;
       
-      const result = await claimNFTBadge(
-        contract!,
+      const result = await claimNFTBadgeGasless(
         badge.id,
         blessings,
         profile!.wallet_address
       );
       
       if (result.success) {
+        // Update badge status in database
+        await markBadgeAsClaimed(
+          badge.id,
+          result.tokenId || '',
+          result.txHash || ''
+        );
+        
         setToastMessage(`🎉 NFT Badge Claimed! Token ID: #${result.tokenId}`);
         setToastType('success');
         loadBadges(); // Reload to show updated status

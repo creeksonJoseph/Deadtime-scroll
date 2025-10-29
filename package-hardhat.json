@@ -1,0 +1,16 @@
+{
+  "name": "deadtime-scroll-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Deadtime Scroll platform",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network scrollSepolia",
+    "verify": "hardhat verify --network scrollSepolia"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^4.9.0",
+    "hardhat": "^2.19.0",
+    "dotenv": "^16.0.0"
+  }
+}

@@ -6,11 +6,15 @@ import { Revival } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
 import { useWallet } from '../contexts/WalletContext';
 import { blessRevival, getRevivalBlessingCount, userHasBlessedRevival, getNextBadgeTier, getCurrentBadgeTier } from '../services/blessingService';
+import { sendTipToRevivalCreator } from '../services/tippingService';
+import { useWeb3 } from '../hooks/useWeb3';
 import Toast from '../components/Toast';
+import BlessingModal from '../components/BlessingModal';
 
 export default function RevivalDetailPage() {
   const { revivalId } = useParams();
   const { profile, isConnected } = useWallet();
+  const { signer } = useWeb3();
   const navigate = useNavigate();
   const [revival, setRevival] = useState<Revival | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,6 +24,7 @@ export default function RevivalDetailPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [showBlessingModal, setShowBlessingModal] = useState(false);
 
   useEffect(() => {
     if (revivalId) {
@@ -52,16 +57,9 @@ export default function RevivalDetailPage() {
     }
   };
 
-  const handleBless = async () => {
+  const handleBlessOnly = async () => {
     if (!isConnected || !profile?.wallet_address) {
       setToastMessage('Please connect your wallet first');
-      setToastType('error');
-      setShowToast(true);
-      return;
-    }
-
-    if (hasBlessed) {
-      setToastMessage('You have already blessed this revival');
       setToastType('error');
       setShowToast(true);
       return;
@@ -82,6 +80,71 @@ export default function RevivalDetailPage() {
 
     setShowToast(true);
     setIsBlessing(false);
+    setShowBlessingModal(false);
+  };
+
+  const handleBlessWithTip = async (tipAmount: string) => {
+    if (!isConnected || !profile?.wallet_address || !signer) {
+      setToastMessage('Please connect your wallet first');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    setIsBlessing(true);
+    
+    try {
+      // First send the tip
+      const tipResult = await sendTipToRevivalCreator(revivalId!, tipAmount, signer);
+      
+      if (!tipResult.success) {
+        setToastMessage(tipResult.error || 'Failed to send tip');
+        setToastType('error');
+        setShowToast(true);
+        setIsBlessing(false);
+        return;
+      }
+
+      // Then add the blessing
+      const blessResult = await blessRevival(revivalId!, profile!.wallet_address);
+      
+      if (blessResult.success) {
+        setHasBlessed(true);
+        await loadBlessingData();
+        setToastMessage(`🎉 ${tipAmount} ETH sent successfully! Blessing added.`);
+        setToastType('success');
+      } else {
+        setToastMessage(`Tip sent but blessing failed: ${blessResult.error}`);
+        setToastType('error');
+      }
+      
+    } catch (error) {
+      console.error('Error in bless with tip:', error);
+      setToastMessage('Failed to process blessing with tip');
+      setToastType('error');
+    }
+
+    setShowToast(true);
+    setIsBlessing(false);
+    setShowBlessingModal(false);
+  };
+
+  const handleBlessClick = () => {
+    if (!isConnected || !profile?.wallet_address) {
+      setToastMessage('Please connect your wallet first');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    if (hasBlessed) {
+      setToastMessage('You have already blessed this revival');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    setShowBlessingModal(true);
   };
 
   if (loading) {
@@ -184,7 +247,7 @@ export default function RevivalDetailPage() {
             </div>
             <div className="flex items-center gap-4">
               <button
-                onClick={handleBless}
+                onClick={handleBlessClick}
                 disabled={!isConnected || hasBlessed || isBlessing}
                 className={`flex items-center gap-2 px-6 py-3 text-lg font-bold transition-all ${
                   hasBlessed
@@ -202,7 +265,7 @@ export default function RevivalDetailPage() {
                 ) : isBlessing ? (
                   <>
                     <Sparkles className="w-5 h-5 animate-spin" />
-                    <span>Blessing...</span>
+                    <span>Processing...</span>
                   </>
                 ) : (
                   <>
@@ -218,6 +281,14 @@ export default function RevivalDetailPage() {
 
         <CommentSection revivalId={revival.id} initialCount={revival.comment_count} />
       </div>
+
+      <BlessingModal
+        isOpen={showBlessingModal}
+        onClose={() => setShowBlessingModal(false)}
+        onBlessOnly={handleBlessOnly}
+        onBlessWithTip={handleBlessWithTip}
+        loading={isBlessing}
+      />
 
       {showToast && (
         <Toast
