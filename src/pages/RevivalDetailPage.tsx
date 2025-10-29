@@ -84,7 +84,21 @@ export default function RevivalDetailPage() {
   };
 
   const handleBlessWithTip = async (tipAmount: string) => {
+    console.log('🎯 Starting bless with tip process:', {
+      tipAmount,
+      revivalId,
+      isConnected,
+      hasProfile: !!profile,
+      hasSigner: !!signer,
+      walletAddress: profile?.wallet_address
+    });
+
     if (!isConnected || !profile?.wallet_address || !signer) {
+      console.error('❌ Prerequisites not met:', {
+        isConnected,
+        hasProfile: !!profile,
+        hasSigner: !!signer
+      });
       setToastMessage('Please connect your wallet first');
       setToastType('error');
       setShowToast(true);
@@ -94,10 +108,15 @@ export default function RevivalDetailPage() {
     setIsBlessing(true);
     
     try {
+      console.log('💰 Sending tip to revival creator...');
+      
       // First send the tip
       const tipResult = await sendTipToRevivalCreator(revivalId!, tipAmount, signer);
       
+      console.log('💰 Tip result:', tipResult);
+      
       if (!tipResult.success) {
+        console.error('❌ Tip failed:', tipResult.error);
         setToastMessage(tipResult.error || 'Failed to send tip');
         setToastType('error');
         setShowToast(true);
@@ -105,21 +124,30 @@ export default function RevivalDetailPage() {
         return;
       }
 
+      console.log('✅ Tip successful, now adding blessing...');
+      
       // Then add the blessing
       const blessResult = await blessRevival(revivalId!, profile!.wallet_address);
+      
+      console.log('🙏 Blessing result:', blessResult);
       
       if (blessResult.success) {
         setHasBlessed(true);
         await loadBlessingData();
+        console.log('🎉 Complete success - tip sent and blessing added');
         setToastMessage(`🎉 ${tipAmount} ETH sent successfully! Blessing added.`);
         setToastType('success');
       } else {
+        console.warn('⚠️ Tip sent but blessing failed:', blessResult.error);
         setToastMessage(`Tip sent but blessing failed: ${blessResult.error}`);
         setToastType('error');
       }
       
     } catch (error) {
-      console.error('Error in bless with tip:', error);
+      console.error('💥 Unexpected error in bless with tip:', {
+        error: error.message,
+        stack: error.stack
+      });
       setToastMessage('Failed to process blessing with tip');
       setToastType('error');
     }

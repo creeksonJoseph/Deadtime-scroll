@@ -9,34 +9,93 @@ export async function sendTipToRevivalCreator(
   tipAmountEth: string,
   userWallet: any
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
+  console.log('🚀 Starting tip transaction:', {
+    revivalId,
+    tipAmountEth,
+    walletConnected: !!userWallet,
+    contractAddress: BADGE_MINTER_V2_ADDRESS
+  });
+
   try {
     if (!userWallet) {
+      console.error('❌ Wallet not connected');
       throw new Error('Wallet not connected');
     }
 
+    // Check wallet network
+    const network = await userWallet.provider.getNetwork();
+    console.log('🌐 Current network:', {
+      chainId: network.chainId,
+      name: network.name,
+      expectedChainId: 534351
+    });
+
+    if (network.chainId !== 534351n) {
+      console.warn('⚠️ Wrong network detected, expected Scroll Sepolia (534351)');
+    }
+
+    // Check wallet balance
+    const balance = await userWallet.provider.getBalance(await userWallet.getAddress());
+    const balanceEth = ethers.formatEther(balance);
+    console.log('💰 Wallet balance:', {
+      balanceWei: balance.toString(),
+      balanceEth,
+      tipAmount: tipAmountEth
+    });
+
     // Create contract instance
     const contract = new ethers.Contract(BADGE_MINTER_V2_ADDRESS, BADGE_MINTER_V2_ABI, userWallet);
+    console.log('📄 Contract instance created');
 
     // Convert ETH amount to wei
     const tipAmountWei = ethers.parseEther(tipAmountEth);
-
-    console.log('Sending tip:', {
-      revivalId,
-      tipAmountEth,
-      tipAmountWei: tipAmountWei.toString()
+    console.log('💱 Amount conversion:', {
+      inputEth: tipAmountEth,
+      outputWei: tipAmountWei.toString(),
+      sufficientBalance: balance >= tipAmountWei
     });
 
+    if (balance < tipAmountWei) {
+      console.error('❌ Insufficient balance for tip');
+      throw new Error('Insufficient ETH balance for tip');
+    }
+
+    // Estimate gas
+    try {
+      const gasEstimate = await contract.tipRevivalCreator.estimateGas(revivalId, {
+        value: tipAmountWei
+      });
+      console.log('⛽ Gas estimate:', gasEstimate.toString());
+    } catch (gasError) {
+      console.error('❌ Gas estimation failed:', gasError);
+      throw new Error('Transaction will likely fail: ' + gasError.message);
+    }
+
+    console.log('📤 Sending transaction to contract...');
+    
     // Send tip transaction
     const tx = await contract.tipRevivalCreator(revivalId, {
       value: tipAmountWei
     });
 
-    console.log('Tip transaction sent:', tx.hash);
+    console.log('✅ Transaction sent:', {
+      hash: tx.hash,
+      from: tx.from,
+      to: tx.to,
+      value: tx.value?.toString()
+    });
 
+    console.log('⏳ Waiting for confirmation...');
+    
     // Wait for confirmation
     const receipt = await tx.wait();
     
-    console.log('Tip transaction confirmed:', receipt);
+    console.log('🎉 Transaction confirmed:', {
+      hash: receipt.hash,
+      blockNumber: receipt.blockNumber,
+      gasUsed: receipt.gasUsed?.toString(),
+      status: receipt.status
+    });
 
     return {
       success: true,
@@ -44,18 +103,27 @@ export async function sendTipToRevivalCreator(
     };
 
   } catch (error: any) {
-    console.error('Tip sending failed:', error);
+    console.error('❌ Tip sending failed:', {
+      error: error.message,
+      code: error.code,
+      reason: error.reason,
+      stack: error.stack
+    });
     
     let errorMessage = 'Failed to send tip';
     if (error.message?.includes('insufficient funds')) {
       errorMessage = 'Insufficient ETH balance for tip + gas fees';
-    } else if (error.message?.includes('user rejected')) {
+    } else if (error.message?.includes('user rejected') || error.code === 4001) {
       errorMessage = 'Transaction cancelled by user';
     } else if (error.message?.includes('Cannot tip yourself')) {
       errorMessage = 'You cannot tip your own revival';
+    } else if (error.reason) {
+      errorMessage = error.reason;
     } else if (error.message) {
       errorMessage = error.message;
     }
+
+    console.error('📋 Final error message:', errorMessage);
 
     return {
       success: false,

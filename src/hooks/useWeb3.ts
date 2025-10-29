@@ -38,17 +38,26 @@ export function useWeb3() {
   };
 
   const connectWallet = async () => {
-    if (!provider) return false;
+    console.log('🔗 Attempting to connect wallet...');
+    
+    if (!provider) {
+      console.error('❌ No provider available');
+      return false;
+    }
 
     try {
+      console.log('💳 Requesting account access...');
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       
+      console.log('🌐 Checking/switching to Scroll Sepolia network...');
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: `0x${SCROLL_SEPOLIA_CONFIG.chainId.toString(16)}` }],
         });
+        console.log('✅ Successfully switched to Scroll Sepolia');
       } catch (switchError: any) {
+        console.log('⚠️ Network switch failed, attempting to add network:', switchError.code);
         if (switchError.code === 4902) {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
@@ -59,12 +68,17 @@ export function useWeb3() {
               blockExplorerUrls: [SCROLL_SEPOLIA_CONFIG.blockExplorer],
             }],
           });
+          console.log('✅ Successfully added Scroll Sepolia network');
         }
       }
 
+      console.log('🔍 Getting signer...');
       const web3Signer = await provider.getSigner();
+      const signerAddress = await web3Signer.getAddress();
+      console.log('👤 Signer address:', signerAddress);
       setSigner(web3Signer);
       
+      console.log('📄 Creating contract instance...');
       const badgeContract = new ethers.Contract(
         BADGE_MINTER_ADDRESS,
         BADGE_MINTER_ABI,
@@ -72,9 +86,14 @@ export function useWeb3() {
       );
       setContract(badgeContract);
       setIsConnected(true);
+      
+      console.log('🎉 Wallet connected successfully!');
       return true;
     } catch (error) {
-      console.error('Error connecting wallet:', error);
+      console.error('❌ Error connecting wallet:', {
+        error: error.message,
+        code: error.code
+      });
       return false;
     }
   };
