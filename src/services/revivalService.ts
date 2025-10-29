@@ -1,4 +1,5 @@
 import { supabase, Revival } from '../lib/supabase';
+import { registerRevivalCreator } from './tippingService';
 
 export const revivalService = {
   async getByProject(projectId: string) {
@@ -98,6 +99,28 @@ export const revivalService = {
     }
     
     console.log('Revival created successfully:', data);
+    
+    // Register revival creator in smart contract for tipping
+    if (revival.reviver_id && data.id) {
+      try {
+        // Get reviver's wallet address
+        const { data: reviverProfile } = await supabase
+          .from('profiles')
+          .select('wallet_address')
+          .eq('id', revival.reviver_id)
+          .single();
+        
+        if (reviverProfile?.wallet_address) {
+          console.log('Registering revival creator in smart contract...');
+          await registerRevivalCreator(data.id, reviverProfile.wallet_address);
+          console.log('Revival creator registered successfully');
+        }
+      } catch (contractError) {
+        console.warn('Failed to register revival creator in contract:', contractError);
+        // Don't fail the revival creation if contract registration fails
+      }
+    }
+    
     return data;
   },
 

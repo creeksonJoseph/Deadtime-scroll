@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-
+import { supabase } from '../lib/supabase';
 import { BADGE_MINTER_V2_ABI, BADGE_MINTER_V2_ADDRESS } from '../config/contracts';
 
 const SCROLL_SEPOLIA_RPC = 'https://sepolia-rpc.scroll.io/';
@@ -114,7 +114,38 @@ export async function sendTipToRevivalCreator(
       console.log('⛽ Gas estimate:', gasEstimate.toString());
     } catch (gasError) {
       console.error('❌ Gas estimation failed:', gasError);
-      throw new Error('Transaction will likely fail: ' + gasError.message);
+      
+      // If revival creator not found, try to register them
+      if (gasError.message?.includes('Revival creator not found')) {
+        console.log('🔄 Attempting to register revival creator...');
+        
+        try {
+          // Get revival creator info
+          const { data: revival } = await supabase
+            .from('revivals')
+            .select('reviver_id, profiles!revivals_reviver_id_fkey(wallet_address)')
+            .eq('id', revivalId)
+            .single();
+          
+          if (revival?.profiles?.wallet_address) {
+            await registerRevivalCreator(revivalId, revival.profiles.wallet_address);
+            console.log('✅ Revival creator registered, retrying transaction...');
+            
+            // Retry gas estimation
+            const retryGasEstimate = await contract.tipRevivalCreator.estimateGas(revivalId, {
+              value: tipAmountWei
+            });
+            console.log('⛽ Retry gas estimate:', retryGasEstimate.toString());
+          } else {
+            throw new Error('Could not find revival creator information');
+          }
+        } catch (registerError) {
+          console.error('❌ Failed to register revival creator:', registerError);
+          throw new Error('Revival creator not registered in contract. Please contact support.');
+        }
+      } else {
+        throw new Error('Transaction will likely fail: ' + gasError.message);
+      }
     }
 
     console.log('📤 Sending transaction to contract...');
