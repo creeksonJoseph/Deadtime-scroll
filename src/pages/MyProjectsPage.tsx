@@ -82,7 +82,7 @@ export default function MyProjectsPage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="text-xl font-bold text-white group-hover:text-primary transition-colors line-clamp-2">
-                    {project.title}
+                    {project.name}
                   </h3>
                   <span className="text-xs bg-zinc-800 text-zinc-300 px-2 py-1 rounded-full whitespace-nowrap ml-2">
                     {project.category}

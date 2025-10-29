@@ -51,6 +51,17 @@ export const projectService = {
     return data;
   },
 
+  async getByUser(userId: string) {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*, profiles(*)')
+      .eq('creator_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as Project[];
+  },
+
   async bless(projectId: string) {
     const { data, error } = await supabase.rpc('increment_project_blessings', {
       project_id: projectId,

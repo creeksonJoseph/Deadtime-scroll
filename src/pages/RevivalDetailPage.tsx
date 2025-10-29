@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Sparkles, GitBranch, Heart, ArrowLeft } from 'lucide-react';
+import { Sparkles, Heart, ArrowLeft } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { Revival } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
@@ -145,13 +145,7 @@ export default function RevivalDetailPage() {
               Live Site
             </a>
           )}
-          {/* <Link
-            to={`/revivals/${revival.id}/bloodline`}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary to-cyan-500 text-black px-6 py-3 font-bold hover:from-primary/80 hover:to-cyan-500/80 transition-all"
-          >
-            <GitBranch className="w-5 h-5" />
-            View Bloodline
-          </Link> */}
+
         </div>
 
         <div className="mb-8">

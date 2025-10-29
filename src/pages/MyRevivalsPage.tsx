@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Edit2, Save, X, ExternalLink, GitBranch } from 'lucide-react';
+import { Sparkles, Edit2, Save, X, ExternalLink } from 'lucide-react';
 import { revivalService } from '../services/revivalService';
 import { useWallet } from '../contexts/WalletContext';
 import { Revival } from '../lib/supabase';
@@ -327,13 +327,7 @@ export default function MyRevivalsPage() {
                           <Sparkles className="w-4 h-4" />
                           View Revival
                         </Link>
-                        <Link
-                          to={`/revivals/${revival.id}/bloodline`}
-                          className="flex items-center gap-2 bg-gradient-to-r from-primary to-cyan-500 text-black px-4 py-2 rounded font-bold hover:from-primary/80 hover:to-cyan-500/80 transition-all text-sm"
-                        >
-                          <GitBranch className="w-4 h-4" />
-                          Bloodline
-                        </Link>
+
                       </div>
                     </>
                   )}
