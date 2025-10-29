@@ -12,6 +12,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import ChatPage from './pages/ChatPage';
 import SubmitProjectPage from './pages/SubmitProjectPage';
 import MyRevivalsPage from './pages/MyRevivalsPage';
+import MyProjectsPage from './pages/MyProjectsPage';
 import BloodlinePage from './pages/BloodlinePage';
 import ReviveProjectPage from './pages/ReviveProjectPage';
 import Web3Status from './components/Web3Status';
@@ -36,6 +37,7 @@ function App() {
               <Route path="/projects/:projectId/revive" element={<ReviveProjectPage />} />
               <Route path="/revivals" element={<MyRevivalsPage />} />
               <Route path="/my-revivals" element={<MyRevivalsPage />} />
+              <Route path="/my-projects" element={<MyProjectsPage />} />
               <Route path="/profile" element={<UserProfilePage />} />
               <Route path="/profile/:walletAddress" element={<PublicProfilePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
