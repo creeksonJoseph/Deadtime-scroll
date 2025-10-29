@@ -230,7 +230,7 @@ export default function RevivalDetailPage() {
           <h1 className="text-zinc-gray text-5xl font-bold mb-2">{revival.title}</h1>
           {revival.profiles && (
             <Link
-              to={`/profile/${revival.reviver_wallet}`}
+              to={`/profile/${revival.profiles?.wallet_address}`}
               className="text-zinc-gray text-lg hover:text-primary transition-colors inline-block"
             >
               Revived by @{revival.profiles.username}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Send, Heart, Clock } from 'lucide-react';
+import { MessageSquare, Send, Heart, Clock, Edit2, Trash2, Check, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useWallet } from '../contexts/WalletContext';
 
@@ -27,6 +27,8 @@ export default function CommentSection({ projectId, revivalId, initialCount = 0 
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState('');
   const { profile, isConnected } = useWallet();
   const navigate = useNavigate();
 
@@ -97,6 +99,54 @@ export default function CommentSection({ projectId, revivalId, initialCount = 0 
       alert('Failed to post comment. Please try again.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEdit = (comment: Comment) => {
+    setEditingId(comment.id);
+    setEditContent(comment.content);
+  };
+
+  const handleSaveEdit = async (commentId: string) => {
+    if (!editContent.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ content: editContent.trim() })
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      setEditingId(null);
+      setEditContent('');
+      await loadComments();
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      alert('Failed to update comment. Please try again.');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditContent('');
+  };
+
+  const handleDelete = async (commentId: string) => {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      await loadComments();
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      alert('Failed to delete comment. Please try again.');
     }
   };
 
@@ -183,48 +233,103 @@ export default function CommentSection({ projectId, revivalId, initialCount = 0 
           </div>
         ) : comments.length > 0 ? (
           <div className="space-y-4">
-            {comments.map((comment) => (
-              <div
-                key={comment.id}
-                className="group bg-zinc-800/30 hover:bg-zinc-800/50 border border-zinc-800 rounded-lg p-4 transition-all"
-              >
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => navigate(`/profile/${comment.user.wallet_address}`)}
-                    className="flex-shrink-0 hover:opacity-80 transition-opacity"
-                  >
-                    <img
-                      src={comment.user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'}
-                      alt={comment.user.username}
-                      className="w-10 h-10 rounded-full object-cover border-2 border-zinc-700"
-                    />
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <button
-                        onClick={() => navigate(`/profile/${comment.user.wallet_address}`)}
-                        className="font-semibold text-white hover:text-primary transition-colors"
-                      >
-                        {comment.user.username}
-                      </button>
-                      <div className="flex items-center gap-1 text-xs text-zinc-500">
-                        <Clock className="w-3 h-3" />
-                        {formatTimeAgo(comment.created_at)}
+            {comments.map((comment) => {
+              const isOwner = profile?.id === comment.user.id;
+              const isEditing = editingId === comment.id;
+              
+              return (
+                <div
+                  key={comment.id}
+                  className="group bg-zinc-800/30 hover:bg-zinc-800/50 border border-zinc-800 rounded-lg p-4 transition-all"
+                >
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => navigate(`/profile/${comment.user.wallet_address}`)}
+                      className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                    >
+                      <img
+                        src={comment.user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'}
+                        alt={comment.user.username}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-zinc-700"
+                      />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => navigate(`/profile/${comment.user.wallet_address}`)}
+                            className="font-semibold text-white hover:text-primary transition-colors"
+                          >
+                            {comment.user.username}
+                          </button>
+                          <div className="flex items-center gap-1 text-xs text-zinc-500">
+                            <Clock className="w-3 h-3" />
+                            {formatTimeAgo(comment.created_at)}
+                          </div>
+                        </div>
+                        {isOwner && !isEditing && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleEdit(comment)}
+                              className="p-1 text-zinc-500 hover:text-blue-400 transition-colors"
+                              title="Edit comment"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(comment.id)}
+                              className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+                              title="Delete comment"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                      {comment.content}
-                    </p>
-                    <div className="flex items-center gap-4 mt-3">
-                      <button className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-red-400 transition-colors group">
-                        <Heart className="w-4 h-4 group-hover:fill-current" />
-                        <span>Like</span>
-                      </button>
+                      
+                      {isEditing ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-primary resize-none"
+                            rows={3}
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleSaveEdit(comment.id)}
+                              className="flex items-center gap-1 px-3 py-1 bg-primary text-black text-xs font-medium rounded hover:bg-primary/80 transition-colors"
+                            >
+                              <Check className="w-3 h-3" />
+                              Save
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="flex items-center gap-1 px-3 py-1 bg-zinc-700 text-zinc-300 text-xs font-medium rounded hover:bg-zinc-600 transition-colors"
+                            >
+                              <X className="w-3 h-3" />
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                            {comment.content}
+                          </p>
+                          <div className="flex items-center gap-4 mt-3">
+                            <button className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-red-400 transition-colors group">
+                              <Heart className="w-4 h-4 group-hover:fill-current" />
+                              <span>Like</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12 px-4">

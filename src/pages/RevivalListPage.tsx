@@ -56,7 +56,7 @@ export default function RevivalListPage() {
                 <h2 className="text-white text-xl font-bold mb-2">{revival.title}</h2>
                 {revival.profiles && (
                   <Link
-                    to={`/profile/${revival.reviver_wallet}`}
+                    to={`/profile/${revival.profiles?.wallet_address}`}
                     className="text-zinc-gray text-sm mb-2 hover:text-primary transition-colors inline-block"
                   >
                     By {revival.profiles.username}
