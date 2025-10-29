@@ -235,19 +235,20 @@ export function getCurrentBadgeTier(currentBlessings: number): BadgeInfo | null 
 // Manual badge creation for production readiness
 export async function checkAndCreateBadge(revivalId: string): Promise<void> {
   try {
-    // Get revival details and blessing count
+    // Get revival details with profile to get wallet address
     const { data: revival, error: revivalError } = await supabase
       .from('revivals')
-      .select('blessing_count, reviver_wallet')
+      .select('blessing_count, reviver_id, profiles!revivals_reviver_id_fkey(wallet_address)')
       .eq('id', revivalId)
       .single();
 
-    if (revivalError || !revival?.reviver_wallet) {
+    if (revivalError || !revival?.profiles?.wallet_address) {
       console.error('Error fetching revival for badge creation:', revivalError);
       return;
     }
 
     const blessingCount = revival.blessing_count || 0;
+    const reviverWallet = revival.profiles.wallet_address;
     
     // Determine which badge to award
     let badgeType: string | null = null;
@@ -271,7 +272,7 @@ export async function checkAndCreateBadge(revivalId: string): Promise<void> {
     const { data: existingBadge } = await supabase
       .from('user_badges')
       .select('id')
-      .eq('user_wallet', revival.reviver_wallet)
+      .eq('user_wallet', reviverWallet)
       .eq('badge_type', badgeType)
       .eq('revival_id', revivalId)
       .single();
@@ -282,7 +283,7 @@ export async function checkAndCreateBadge(revivalId: string): Promise<void> {
     const { error: badgeError } = await supabase
       .from('user_badges')
       .insert({
-        user_wallet: revival.reviver_wallet,
+        user_wallet: reviverWallet,
         badge_type: badgeType,
         revival_id: revivalId,
         earned_at: new Date().toISOString(),
@@ -292,7 +293,7 @@ export async function checkAndCreateBadge(revivalId: string): Promise<void> {
     if (badgeError) {
       console.error('Error creating badge:', badgeError);
     } else {
-      console.log(`Badge ${badgeType} created for user ${revival.reviver_wallet}`);
+      console.log(`Badge ${badgeType} created for user ${reviverWallet}`);
     }
   } catch (error) {
     console.error('Error in checkAndCreateBadge:', error);
