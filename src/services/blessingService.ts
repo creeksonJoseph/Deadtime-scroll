@@ -86,10 +86,29 @@ export async function blessRevival(revivalId: string, userWallet: string): Promi
       return { success: false, error: 'You cannot bless a project twice' };
     }
 
-    const { data, error } = await supabase.rpc('add_revival_blessing', {
+    // Try the new function first, fallback to old method
+    let { data, error } = await supabase.rpc('add_revival_blessing', {
       p_revival_id: revivalId,
       p_user_wallet: userWallet
     });
+
+    // If new function doesn't exist, use old method
+    if (error && (error.message?.includes('add_revival_blessing') || error.code === 'PGRST202')) {
+      const { error: oldError } = await supabase.rpc('increment_revival_blessings', {
+        revival_id_param: revivalId
+      });
+      
+      if (oldError) {
+        throw oldError;
+      }
+      
+      // Manually create badge if threshold reached
+      await checkAndCreateBadge(revivalId);
+      
+      // Mark as blessed locally
+      localStorage.setItem(blessedKey, 'true');
+      return { success: true };
+    }
 
     if (error) {
       throw error;
@@ -104,7 +123,7 @@ export async function blessRevival(revivalId: string, userWallet: string): Promi
     return { success: true };
   } catch (error) {
     console.error('Error blessing revival:', error);
-    return { success: false, error: 'Failed to bless revival' };
+    return { success: false, error: `Failed to bless revival: ${error instanceof Error ? error.message : 'Unknown error'}` };
   }
 }
 
@@ -211,4 +230,71 @@ export function getCurrentBadgeTier(currentBlessings: number): BadgeInfo | null 
     }
   }
   return null;
+}
+
+// Manual badge creation for production readiness
+export async function checkAndCreateBadge(revivalId: string): Promise<void> {
+  try {
+    // Get revival details and blessing count
+    const { data: revival, error: revivalError } = await supabase
+      .from('revivals')
+      .select('blessing_count, reviver_wallet')
+      .eq('id', revivalId)
+      .single();
+
+    if (revivalError || !revival?.reviver_wallet) {
+      console.error('Error fetching revival for badge creation:', revivalError);
+      return;
+    }
+
+    const blessingCount = revival.blessing_count || 0;
+    
+    // Determine which badge to award
+    let badgeType: string | null = null;
+    if (blessingCount >= 150) {
+      badgeType = 'master_curator';
+    } else if (blessingCount >= 100) {
+      badgeType = 'soul_shepherd';
+    } else if (blessingCount >= 70) {
+      badgeType = 'phoenix';
+    } else if (blessingCount >= 50) {
+      badgeType = 'digital_ghost';
+    } else if (blessingCount >= 30) {
+      badgeType = 'necromancer';
+    } else if (blessingCount >= 1) {
+      badgeType = 'grave_keeper';
+    }
+
+    if (!badgeType) return;
+
+    // Check if badge already exists
+    const { data: existingBadge } = await supabase
+      .from('user_badges')
+      .select('id')
+      .eq('user_wallet', revival.reviver_wallet)
+      .eq('badge_type', badgeType)
+      .eq('revival_id', revivalId)
+      .single();
+
+    if (existingBadge) return; // Badge already exists
+
+    // Create the badge
+    const { error: badgeError } = await supabase
+      .from('user_badges')
+      .insert({
+        user_wallet: revival.reviver_wallet,
+        badge_type: badgeType,
+        revival_id: revivalId,
+        earned_at: new Date().toISOString(),
+        claimed: false
+      });
+
+    if (badgeError) {
+      console.error('Error creating badge:', badgeError);
+    } else {
+      console.log(`Badge ${badgeType} created for user ${revival.reviver_wallet}`);
+    }
+  } catch (error) {
+    console.error('Error in checkAndCreateBadge:', error);
+  }
 }

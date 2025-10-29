@@ -2,9 +2,77 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Code, RefreshCw, Sparkles, GitBranch, ArrowLeft } from 'lucide-react';
 import { projectService } from '../services/projectService';
+import { revivalService } from '../services/revivalService';
 import { Project } from '../lib/supabase';
 import CommentSection from '../components/CommentSection';
 import { useWallet } from '../contexts/WalletContext';
+
+function ReviveButton({ project }: { project: Project }) {
+  const { profile } = useWallet();
+  const [hasRevived, setHasRevived] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkIfRevived();
+  }, [profile, project.id]);
+
+  const checkIfRevived = async () => {
+    if (!profile) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const revivals = await revivalService.getByUser(profile.id);
+      const hasRevivedProject = revivals.some(revival => revival.project_id === project.id);
+      setHasRevived(hasRevivedProject);
+    } catch (error) {
+      console.error('Error checking revivals:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="inline-flex items-center gap-2 bg-zinc-800 text-zinc-400 px-6 py-3 font-bold">
+        <Sparkles className="w-5 h-5" />
+        Loading...
+      </div>
+    );
+  }
+
+  // User is the project creator
+  if (project.creator_id === profile?.id) {
+    return (
+      <div className="inline-flex items-center gap-2 bg-zinc-800 text-zinc-400 px-6 py-3 font-bold cursor-not-allowed" title="You cannot revive your own project">
+        <Sparkles className="w-5 h-5" />
+        Your Project
+      </div>
+    );
+  }
+
+  // User already revived this project
+  if (hasRevived) {
+    return (
+      <div className="inline-flex items-center gap-2 bg-zinc-800 text-zinc-400 px-6 py-3 font-bold cursor-not-allowed" title="You have already revived this project">
+        <Sparkles className="w-5 h-5" />
+        Already Revived
+      </div>
+    );
+  }
+
+  // User can revive this project
+  return (
+    <Link
+      to={`/projects/${project.id}/revive`}
+      className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-cyan-500 text-black px-6 py-3 font-bold hover:from-primary/80 hover:to-cyan-500/80 transition-all"
+    >
+      <Sparkles className="w-5 h-5" />
+      Revive This Project
+    </Link>
+  );
+}
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams();
@@ -123,13 +191,7 @@ export default function ProjectDetailPage() {
             <span>View Bloodline</span>
           </Link> */}
           {isConnected && (
-            <Link
-              to={`/projects/${projectId}/revive`}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-cyan-500 text-black px-6 py-3 font-bold hover:from-primary/80 hover:to-cyan-500/80 transition-all"
-            >
-              <Sparkles className="w-5 h-5" />
-              Revive This Project
-            </Link>
+            <ReviveButton project={project} />
           )}
         </div>
 

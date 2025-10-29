@@ -51,6 +51,20 @@ export const revivalService = {
   }) {
     console.log('Creating revival with data:', revival);
     
+    // Check if user already revived this project
+    if (revival.reviver_id) {
+      const { data: existingRevival } = await supabase
+        .from('revivals')
+        .select('id')
+        .eq('project_id', revival.project_id)
+        .eq('reviver_id', revival.reviver_id)
+        .single();
+      
+      if (existingRevival) {
+        throw new Error('You have already revived this project. Each user can only revive a project once.');
+      }
+    }
+    
     // Ensure root_project_id is set for direct project revivals
     const revivalData = {
       ...revival,

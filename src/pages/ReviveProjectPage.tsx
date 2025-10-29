@@ -58,6 +58,16 @@ export default function ReviveProjectPage() {
       return;
     }
 
+    // Check if user is trying to revive their own project
+    if (project?.creator_id === profile.id) {
+      setNotification({
+        type: 'error',
+        title: 'Cannot Revive Own Project',
+        message: 'You cannot revive your own project. Only other users can revive your projects.',
+      });
+      return;
+    }
+
     if (!formData.title.trim()) {
       setNotification({
         type: 'error',
