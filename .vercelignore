@@ -1,0 +1,5 @@
+contract-deployment/
+contracts/
+hardhat.config.js
+scripts/
+*.sol
