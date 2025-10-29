@@ -32,6 +32,10 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onToggle, onMobileC
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
+    // Don't highlight profile for other users' profiles
+    if (path === '/profile') {
+      return location.pathname === '/profile';
+    }
     return location.pathname.startsWith(path);
   };
 

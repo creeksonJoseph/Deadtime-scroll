@@ -2,27 +2,60 @@ import { supabase, Profile } from '../lib/supabase';
 
 export const profileService = {
   async getByWallet(walletAddress: string) {
-    const { data, error } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
-      .select('*, projects_count:projects(count), revivals_count:revivals(count)')
+      .select('*')
       .eq('wallet_address', walletAddress)
       .maybeSingle();
 
     if (error) throw error;
-    return data as Profile | null;
+    if (!profile) return null;
+
+    // Get actual counts from related tables
+    const { count: projectsCount } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('creator_id', profile.id);
+
+    const { count: revivalsCount } = await supabase
+      .from('revivals')
+      .select('*', { count: 'exact', head: true })
+      .eq('reviver_id', profile.id);
+
+    return {
+      ...profile,
+      projects_count: projectsCount || 0,
+      revivals_count: revivalsCount || 0
+    } as Profile;
   },
 
   async getById(id: string) {
-    const { data, error } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
-      .select('*, projects_count:projects(count), revivals_count:revivals(count)')
+      .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
       throw new Error(`Failed to fetch profile by ID ${id}: ${error.message}`);
     }
-    return data as Profile;
+
+    // Get actual counts from related tables
+    const { count: projectsCount } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('creator_id', profile.id);
+
+    const { count: revivalsCount } = await supabase
+      .from('revivals')
+      .select('*', { count: 'exact', head: true })
+      .eq('reviver_id', profile.id);
+
+    return {
+      ...profile,
+      projects_count: projectsCount || 0,
+      revivals_count: revivalsCount || 0
+    } as Profile;
   },
 
   async create(profile: {

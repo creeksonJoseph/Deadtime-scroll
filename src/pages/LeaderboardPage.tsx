@@ -76,7 +76,7 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-4 text-zinc-400 text-sm">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="text-neon-green" />
-                      <span>{profile.revivals_count}</span>
+                      <span>{profile.revivals_count || 0}</span>
                     </div>
                   </td>
                 </tr>

@@ -144,6 +144,14 @@ export default function RevivalDetailPage() {
       return;
     }
 
+    // Check if user is trying to bless their own revival
+    if (revival?.reviver_id === profile?.id) {
+      setToastMessage('You cannot bless your own revival');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
     setShowBlessingModal(true);
   };
 
@@ -248,12 +256,16 @@ export default function RevivalDetailPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={handleBlessClick}
-                disabled={!isConnected || hasBlessed || isBlessing}
+                disabled={!isConnected || hasBlessed || isBlessing || revival?.reviver_id === profile?.id}
                 className={`flex items-center gap-2 px-6 py-3 text-lg font-bold transition-all ${
                   hasBlessed
                     ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                    : revival?.reviver_id === profile?.id
+                    ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
                     : isBlessing
                     ? 'bg-primary/50 text-background-dark cursor-wait'
+                    : !isConnected
+                    ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
                     : 'bg-primary text-background-dark hover:bg-primary/80'
                 }`}
               >
@@ -261,6 +273,16 @@ export default function RevivalDetailPage() {
                   <>
                     <Heart className="w-5 h-5 fill-current" />
                     <span>Blessed</span>
+                  </>
+                ) : revival?.reviver_id === profile?.id ? (
+                  <>
+                    <Heart className="w-5 h-5" />
+                    <span>Your Revival</span>
+                  </>
+                ) : !isConnected ? (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    <span>Connect Wallet</span>
                   </>
                 ) : isBlessing ? (
                   <>
