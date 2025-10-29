@@ -42,6 +42,7 @@ function App() {
               <Route path="/profile/:walletAddress" element={<PublicProfilePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/chat" element={<ChatPage />} />
+              <Route path="/chat/:partnerId" element={<ChatPage />} />
             </Route>
           </Routes>
           {import.meta.env.DEV && <Web3Status />}

@@ -1,31 +1,65 @@
 import { useState, useEffect } from 'react';
-import { Send, PlusCircle } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { MessageCircle, Users, Send, ArrowLeft } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
-import { supabase, Message } from '../lib/supabase';
+import { messageService, Message, Conversation } from '../services/messageService';
+import { profileService } from '../services/profileService';
+
 
 export default function ChatPage() {
+  const { partnerId } = useParams();
+  const navigate = useNavigate();
   const { profile } = useWallet();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [message, setMessage] = useState('');
+  const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [partnerProfile, setPartnerProfile] = useState<any>(null);
 
   useEffect(() => {
-    if (profile) {
-      loadMessages();
+    if (profile?.id) {
+      if (partnerId) {
+        loadPartnerProfile();
+        loadMessages();
+      } else {
+        loadConversations();
+      }
     }
-  }, [profile]);
+  }, [profile?.id, partnerId]);
+
+  const loadPartnerProfile = async () => {
+    if (!partnerId) return;
+    try {
+      const data = await profileService.getById(partnerId);
+      setPartnerProfile(data);
+    } catch (error) {
+      console.error('Error loading partner profile:', error);
+    }
+  };
+
+  const loadConversations = async () => {
+    if (!profile?.id) return;
+    try {
+      const data = await messageService.getConversations(profile.id);
+      setConversations(data);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadMessages = async () => {
-    if (!profile) return;
+    if (!profile?.id || !partnerId) return;
     try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*, sender:sender_id(*), recipient:recipient_id(*)')
-        .or(`sender_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
-        .order('created_at', { ascending: true });
-      if (error) throw error;
-      setMessages(data || []);
+      const data = await messageService.getMessages(profile.id, partnerId);
+      setMessages(data);
+      
+      // Mark messages as read
+      const unreadMessages = data.filter(m => m.recipient_id === profile.id && !m.is_read);
+      if (unreadMessages.length > 0) {
+        await messageService.markAsRead(unreadMessages.map(m => m.id));
+      }
     } catch (error) {
       console.error('Error loading messages:', error);
     } finally {
@@ -33,93 +67,190 @@ export default function ChatPage() {
     }
   };
 
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !profile?.id || !partnerId) return;
+    
+    try {
+      const message = await messageService.sendMessage(profile.id, partnerId, newMessage);
+      setMessages(prev => [...prev, message]);
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  const selectConversation = (conversation: Conversation) => {
+    navigate(`/chat/${conversation.user.id}`);
+  };
+
   if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-zinc-gray text-xl">Please connect your wallet</p>
+        <p className="text-zinc-400 text-xl">Please connect your wallet to access messages</p>
       </div>
     );
   }
 
-  if (loading) {
+  // Direct chat with specific user
+  if (partnerId) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-zinc-400 text-xl">Loading messages...</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-zinc-400">No messages yet</p>
+      <div className="bg-background-dark min-h-screen p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-3 mb-8">
+            <button
+              onClick={() => navigate('/chat')}
+              className="text-zinc-400 hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <MessageCircle className="w-10 h-10 text-primary" />
+            <h1 className="text-white text-4xl font-bold">
+              {partnerProfile ? `Chat with ${partnerProfile.username}` : 'Chat'}
+            </h1>
           </div>
-        ) : (
-          messages.map((msg) => {
-            const isOwn = msg.sender_id === profile.id;
-            return (
-              <div key={msg.id}>
-                {isOwn ? (
-                  <div className="flex items-end gap-3 p-4 justify-end">
-                    <div className="flex flex-1 flex-col gap-1 items-end">
-                      <p className="text-zinc-400 text-[13px] max-w-[360px] text-right">
-                        You • {new Date(msg.created_at).toLocaleTimeString()}
-                      </p>
-                      <p className="text-base leading-normal max-w-[360px] px-4 py-3 bg-primary text-black">
-                        {msg.content}
-                      </p>
-                    </div>
-                    <img
-                      className="w-10 h-10 shrink-0"
-                      alt="Your avatar"
-                      src={profile.avatar_url || 'https://via.placeholder.com/40'}
-                    />
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg h-[600px] flex flex-col">
+            {/* Chat Header */}
+            {partnerProfile && (
+              <div className="p-4 border-b border-zinc-800">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={partnerProfile.avatar_url || 'https://via.placeholder.com/40'}
+                    alt={partnerProfile.username}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-white font-semibold">{partnerProfile.username}</p>
+                    <p className="text-zinc-400 text-sm">@{partnerProfile.username}</p>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-3 p-4">
-                    <img
-                      className="w-10 h-10 shrink-0"
-                      alt="Sender avatar"
-                      src={msg.sender?.avatar_url || 'https://via.placeholder.com/40'}
-                    />
-                    <div className="flex flex-1 flex-col gap-1 items-start">
-                      <p className="text-zinc-400 text-[13px] max-w-[360px]">
-                        {msg.sender?.username} • {new Date(msg.created_at).toLocaleTimeString()}
-                      </p>
-                      <p className="text-base leading-normal max-w-[360px] px-4 py-3 bg-zinc-gray text-white">
-                        {msg.content}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
-            );
-          })
-        )}
-      </div>
-      <div className="flex items-center px-6 py-4 gap-3 border-t border-solid border-zinc-gray/50">
-        <label className="flex flex-col min-w-40 h-12 flex-1">
-          <div className="flex w-full flex-1 items-stretch h-full">
-            <input
-              className="flex w-full min-w-0 flex-1 text-white focus:outline-0 focus:ring-0 border-none bg-zinc-gray/30 h-full placeholder:text-zinc-400 px-4 text-base"
-              placeholder="Type a message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <div className="flex border-none bg-zinc-gray/30 items-center justify-center pr-2">
-              <div className="flex items-center gap-2">
-                <button className="flex items-center justify-center p-2 text-white">
-                  <PlusCircle />
-                </button>
-                <button className="flex items-center justify-center p-2 bg-primary text-black">
-                  <Send />
+            )}
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-zinc-400">Loading messages...</p>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-zinc-400">No messages yet. Start the conversation!</p>
+                </div>
+              ) : (
+                messages.map((message) => {
+                  const isOwn = message.sender_id === profile.id;
+                  return (
+                    <div
+                      key={message.id}
+                      className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          isOwn
+                            ? 'bg-primary text-black'
+                            : 'bg-zinc-800 text-white'
+                        }`}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            isOwn ? 'text-black/70' : 'text-zinc-400'
+                          }`}
+                        >
+                          {new Date(message.created_at).toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Message Input */}
+            <div className="p-4 border-t border-zinc-800">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-zinc-800 border border-zinc-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-primary"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                  className="bg-primary text-black px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50"
+                >
+                  <Send className="w-5 h-5" />
                 </button>
               </div>
             </div>
           </div>
-        </label>
+        </div>
+      </div>
+    );
+  }
+
+  // Conversations list view
+  return (
+    <div className="bg-background-dark min-h-screen p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center gap-3 mb-8">
+          <MessageCircle className="w-10 h-10 text-primary" />
+          <h1 className="text-white text-4xl font-bold">Messages</h1>
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+          <div className="p-4 border-b border-zinc-800">
+            <h2 className="text-white font-bold flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Conversations
+            </h2>
+          </div>
+          <div className="divide-y divide-zinc-800">
+            {loading ? (
+              <div className="p-8 text-zinc-400 text-center">Loading...</div>
+            ) : conversations.length === 0 ? (
+              <div className="p-8 text-zinc-400 text-center">
+                <MessageCircle className="w-12 h-12 mx-auto mb-4 text-zinc-600" />
+                <p>No conversations yet</p>
+                <p className="text-sm mt-2">Visit a user's profile and click "Message" to start chatting!</p>
+              </div>
+            ) : (
+              conversations.map((conversation) => (
+                <div
+                  key={conversation.user.id}
+                  onClick={() => selectConversation(conversation)}
+                  className="p-4 hover:bg-zinc-800 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={conversation.user.avatar_url || 'https://via.placeholder.com/40'}
+                      alt={conversation.user.username}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold">{conversation.user.username}</p>
+                      <p className="text-zinc-400 text-sm truncate">
+                        {conversation.lastMessage.content}
+                      </p>
+                    </div>
+                    {conversation.unreadCount > 0 && (
+                      <div className="bg-primary text-black text-xs px-2 py-1 rounded-full font-bold">
+                        {conversation.unreadCount}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

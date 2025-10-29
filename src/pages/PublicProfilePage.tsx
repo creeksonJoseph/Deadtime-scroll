@@ -9,7 +9,8 @@ import BadgeDisplay from '../components/BadgeDisplay';
 
 export default function PublicProfilePage() {
   const { walletAddress: viewingWallet } = useParams<{ walletAddress: string }>();
-  const { walletAddress: currentUserWallet } = useWallet();
+  const { profile: currentUser } = useWallet();
+  const currentUserWallet = currentUser?.wallet_address;
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [badges, setBadges] = useState<Badge[]>([]);
@@ -50,8 +51,9 @@ export default function PublicProfilePage() {
     setBadges(userBadges);
   };
 
-  const handleMessage = () => {
-    navigate(`/chat?user=${viewingWallet}`);
+  const handleMessage = async () => {
+    if (!currentUser?.id || !profile?.id) return;
+    navigate(`/chat/${profile.id}`);
   };
 
   if (loading) {
