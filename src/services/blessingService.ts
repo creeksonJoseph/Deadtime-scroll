@@ -86,12 +86,17 @@ export async function blessRevival(revivalId: string, userWallet: string): Promi
       return { success: false, error: 'You cannot bless a project twice' };
     }
 
-    const { error } = await supabase.rpc('increment_revival_blessings', {
-      revival_id_param: revivalId
+    const { data, error } = await supabase.rpc('add_revival_blessing', {
+      p_revival_id: revivalId,
+      p_user_wallet: userWallet
     });
 
     if (error) {
       throw error;
+    }
+
+    if (!data) {
+      return { success: false, error: 'You cannot bless a project twice' };
     }
 
     // Mark as blessed locally
