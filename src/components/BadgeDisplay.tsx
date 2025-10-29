@@ -39,7 +39,7 @@ export default function BadgeDisplay({ badges, onClaimBadge, isOwnProfile = fals
 
           return (
             <BadgeCard
-              key={badge.id}
+              key={String(badge.id)}
               badge={badge}
               badgeInfo={badgeInfo}
               onClaim={onClaimBadge}
@@ -82,17 +82,17 @@ function BadgeCard({ badge, badgeInfo, onClaim, isOwnProfile }: BadgeCardProps) 
         <div className="text-4xl mb-3">{badgeInfo.icon}</div>
 
         <h4 className="text-lg font-bold text-white mb-2">
-          {badgeInfo.name}
+          {String(badgeInfo.name)}
         </h4>
 
         <p className="text-sm text-gray-300 mb-4">
-          {badgeInfo.description}
+          {String(badgeInfo.description)}
         </p>
 
         {badge.claimed ? (
           <div className="space-y-2">
             <div className="flex items-center justify-center gap-1 text-xs text-gray-300">
-              <span className="font-mono">#{badge.token_id}</span>
+              <span className="font-mono">#{String(badge.token_id || '')}</span>
             </div>
             {badge.tx_hash && (
               <a

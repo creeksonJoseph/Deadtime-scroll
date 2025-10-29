@@ -277,15 +277,15 @@ export default function UserProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
             <h3 className="text-zinc-400 text-sm font-semibold mb-2">Total Blessings</h3>
-            <p className="text-primary text-3xl font-bold">{profile.total_blessings}</p>
+            <p className="text-primary text-3xl font-bold">{profile.total_blessings || 0}</p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
             <h3 className="text-zinc-400 text-sm font-semibold mb-2">Projects Submitted</h3>
-            <p className="text-primary text-3xl font-bold">{profile.projects_count}</p>
+            <p className="text-primary text-3xl font-bold">{(profile.projects_count as any)?.count || 0}</p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
             <h3 className="text-zinc-400 text-sm font-semibold mb-2">Revivals Created</h3>
-            <p className="text-primary text-3xl font-bold">{profile.revivals_count}</p>
+            <p className="text-primary text-3xl font-bold">{(profile.revivals_count as any)?.count || 0}</p>
           </div>
         </div>
 
