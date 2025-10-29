@@ -31,8 +31,8 @@ export const BADGE_TIERS: BadgeInfo[] = [
   {
     type: 'grave_keeper',
     name: 'Grave Keeper',
-    threshold: 10,
-    description: 'Earned 10 blessings on a revival',
+    threshold: 1,
+    description: 'Earned 1 blessing on a revival',
     color: 'from-gray-400 to-gray-600',
     icon: '⚰️'
   },

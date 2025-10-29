@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * No explicit if-statements — thresholds determine which badge a user earns.
  *
  * Badge thresholds (inclusive):
- *  - 10  => Gravekeeper
+ *  - 1   => Gravekeeper
  *  - 30  => Necromancer
  *  - 50  => Digital Ghost
  *  - 70  => Phoenix
@@ -45,7 +45,7 @@ contract BadgeMinter is ERC721URIStorage, Ownable {
 
     constructor(string memory baseURI_) ERC721("Deadtime Scroll Badges", "DSB") Ownable(msg.sender) {
         // Initialize thresholds
-        thresholds.push(10);
+        thresholds.push(1);
         thresholds.push(30);
         thresholds.push(50);
         thresholds.push(70);

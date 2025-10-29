@@ -2,12 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { Camera, Edit2, Save, X } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
 import { profileService } from '../services/profileService';
-import { getUserBadges, Badge } from '../services/blessingService';
+import { getUserBadges, Badge, getCurrentBadgeTier } from '../services/blessingService';
+import { useWeb3 } from '../hooks/useWeb3';
+import { claimNFTBadge } from '../services/nftService';
 import BadgeDisplay from '../components/BadgeDisplay';
 import Toast from '../components/Toast';
 
 export default function UserProfilePage() {
-  const { profile, walletAddress } = useWallet();
+  const { profile } = useWallet();
+  const { contract, isConnected: isWeb3Connected, connectWallet } = useWeb3();
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -29,14 +32,14 @@ export default function UserProfilePage() {
   }, [profile]);
 
   useEffect(() => {
-    if (walletAddress) {
+    if (profile?.wallet_address) {
       loadBadges();
     }
-  }, [walletAddress]);
+  }, [profile?.wallet_address]);
 
   const loadBadges = async () => {
-    if (!walletAddress) return;
-    const userBadges = await getUserBadges(walletAddress);
+    if (!profile?.wallet_address) return;
+    const userBadges = await getUserBadges(profile.wallet_address);
     setBadges(userBadges);
   };
 
@@ -65,8 +68,8 @@ export default function UserProfilePage() {
         const base64 = reader.result as string;
         setAvatarUrl(base64);
 
-        if (walletAddress) {
-          await profileService.update(walletAddress, { avatar_url: base64 });
+        if (profile?.wallet_address) {
+          await profileService.update(profile.wallet_address, { avatar_url: base64 });
           window.location.reload();
         }
       };
@@ -80,11 +83,11 @@ export default function UserProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!walletAddress) return;
+    if (!profile?.wallet_address) return;
 
     try {
       setSaving(true);
-      await profileService.update(walletAddress, {
+      await profileService.update(profile.wallet_address, {
         username,
         bio,
         avatar_url: avatarUrl,
@@ -108,10 +111,48 @@ export default function UserProfilePage() {
     setIsEditing(false);
   };
 
-  const handleClaimBadge = async (_badge: Badge) => {
-    setToastMessage('NFT minting feature coming soon! Connect your contract address to enable minting.');
-    setToastType('success');
-    setShowToast(true);
+  const handleClaimBadge = async (badge: Badge) => {
+    if (!isWeb3Connected || !contract) {
+      const connected = await connectWallet();
+      if (!connected) {
+        setToastMessage('Please connect your Web3 wallet to claim NFT badges');
+        setToastType('error');
+        setShowToast(true);
+        return;
+      }
+    }
+
+    try {
+      setToastMessage('Claiming NFT Badge... Transaction will be paid by the platform!');
+      setToastType('success');
+      setShowToast(true);
+      
+      // Get user's total blessings for this revival
+      const blessings = profile?.total_blessings || 1;
+      
+      const result = await claimNFTBadge(
+        contract!,
+        badge.id,
+        blessings,
+        profile!.wallet_address
+      );
+      
+      if (result.success) {
+        setToastMessage(`🎉 NFT Badge Claimed! Token ID: #${result.tokenId}`);
+        setToastType('success');
+        loadBadges(); // Reload to show updated status
+      } else {
+        setToastMessage(result.error || 'Failed to claim NFT badge');
+        setToastType('error');
+      }
+      
+    } catch (error) {
+      console.error('Error claiming badge:', error);
+      setToastMessage('Failed to claim NFT badge. Please try again.');
+      setToastType('error');
+    } finally {
+      setShowToast(true);
+    }
   };
 
   if (!profile) {
@@ -207,7 +248,7 @@ export default function UserProfilePage() {
                   Wallet Address
                 </label>
                 <p className="text-zinc-500 font-mono text-sm break-all">
-                  {walletAddress}
+                  {profile.wallet_address}
                 </p>
               </div>
 

@@ -26,7 +26,7 @@ export default function BadgeDisplay({ badges, onClaimBadge, isOwnProfile = fals
   }
 
   return (
-    <div className="bg-dark-lighter rounded-xl p-6 border border-dark-border">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
       <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
         <Award className="w-6 h-6 text-primary" />
         NFT Badges
@@ -67,12 +67,12 @@ function BadgeCard({ badge, badgeInfo, onClaim, isOwnProfile }: BadgeCardProps) 
       className={`relative rounded-xl p-6 border-2 ${
         badge.claimed
           ? 'bg-gradient-to-br ' + badgeInfo.color + ' border-transparent'
-          : 'bg-dark-card border-primary border-dashed'
+          : 'bg-zinc-800 border-primary border-dashed'
       } transition-all duration-300 hover:scale-105`}
     >
       {!badge.claimed && (
         <div className="absolute top-2 right-2">
-          <span className="inline-block px-2 py-1 text-xs font-semibold bg-primary text-dark rounded-full animate-pulse">
+          <span className="inline-block px-2 py-1 text-xs font-semibold bg-primary text-black rounded-full animate-pulse">
             NEW
           </span>
         </div>
@@ -110,7 +110,7 @@ function BadgeCard({ badge, badgeInfo, onClaim, isOwnProfile }: BadgeCardProps) 
           isOwnProfile && onClaim && (
             <button
               onClick={() => onClaim(badge)}
-              className="w-full btn-primary text-sm py-2 flex items-center justify-center gap-2"
+              className="w-full bg-primary text-black text-sm py-2 px-4 font-bold hover:bg-primary/80 transition-colors flex items-center justify-center gap-2 rounded"
             >
               <Award className="w-4 h-4" />
               Claim NFT Badge

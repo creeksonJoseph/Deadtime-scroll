@@ -14,7 +14,7 @@ import SubmitProjectPage from './pages/SubmitProjectPage';
 import MyRevivalsPage from './pages/MyRevivalsPage';
 import BloodlinePage from './pages/BloodlinePage';
 import ReviveProjectPage from './pages/ReviveProjectPage';
-
+import Web3Status from './components/Web3Status';
 
 function App() {
   console.log('App component mounting...');
@@ -42,7 +42,7 @@ function App() {
               <Route path="/chat" element={<ChatPage />} />
             </Route>
           </Routes>
-
+          {import.meta.env.DEV && <Web3Status />}
         </div>
       </WalletProvider>
     </Router>
