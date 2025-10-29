@@ -20,9 +20,26 @@ export default function BlessingModal({
   const [tipAmount, setTipAmount] = useState('');
   const [selectedOption, setSelectedOption] = useState<'bless' | 'tip' | null>(null);
 
+  console.log('🎭 BlessingModal render:', {
+    isOpen,
+    loading,
+    selectedOption,
+    tipAmount
+  });
+
   const handleTipSubmit = () => {
+    console.log('💰 Tip submit clicked!', {
+      tipAmount,
+      parsedAmount: parseFloat(tipAmount),
+      isValid: tipAmount && parseFloat(tipAmount) > 0,
+      loading
+    });
+    
     if (tipAmount && parseFloat(tipAmount) > 0) {
+      console.log('✅ Calling onBlessWithTip with amount:', tipAmount);
       onBlessWithTip(tipAmount);
+    } else {
+      console.log('❌ Invalid tip amount');
     }
   };
 
@@ -130,15 +147,14 @@ export default function BlessingModal({
                   </label>
                   <input
                     type="number"
-                    step="0.001"
-                    min="0.001"
+                    step="0.000001"
                     value={tipAmount}
                     onChange={(e) => setTipAmount(e.target.value)}
                     placeholder="0.01"
                     className="w-full bg-zinc-800 border border-zinc-700 text-white px-4 py-3 rounded focus:outline-none focus:border-primary"
                   />
                   <p className="text-zinc-500 text-xs mt-1">
-                    Minimum: 0.001 ETH (~$3)
+                    Any amount (testnet ETH)
                   </p>
                 </div>
 
@@ -150,8 +166,11 @@ export default function BlessingModal({
                     Back
                   </button>
                   <button
-                    onClick={handleTipSubmit}
-                    disabled={loading || !tipAmount || parseFloat(tipAmount) < 0.001}
+                    onClick={() => {
+                      console.log('🔘 Send ETH button clicked!');
+                      handleTipSubmit();
+                    }}
+                    disabled={loading || !tipAmount || parseFloat(tipAmount) <= 0}
                     className="flex-1 bg-primary text-black px-4 py-3 font-bold hover:bg-primary/80 transition-colors disabled:opacity-50"
                   >
                     {loading ? 'Sending...' : `Send ${tipAmount || '0'} ETH`}

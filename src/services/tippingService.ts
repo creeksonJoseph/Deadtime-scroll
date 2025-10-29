@@ -31,24 +31,60 @@ export async function sendTipToRevivalCreator(
     });
 
     if (network.chainId !== 534351n) {
-      console.warn('⚠️ Wrong network detected, expected Scroll Sepolia (534351)');
+      console.warn('⚠️ Wrong network detected, switching to Scroll Sepolia (534351)');
+      
+      try {
+        // Try to switch to Scroll Sepolia
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x82750' }], // 534351 in hex
+        });
+        console.log('✅ Successfully switched to Scroll Sepolia');
+        
+        // Refresh network info after switch
+        const newNetwork = await userWallet.provider.getNetwork();
+        console.log('🔄 New network:', newNetwork);
+        
+      } catch (switchError: any) {
+        console.log('⚠️ Network switch failed, attempting to add network:', switchError.code);
+        
+        if (switchError.code === 4902) {
+          // Network not added, add it
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x82750',
+              chainName: 'Scroll Sepolia Testnet',
+              rpcUrls: ['https://sepolia-rpc.scroll.io/', 'https://rpc.ankr.com/scroll_sepolia_testnet'],
+              blockExplorerUrls: ['https://sepolia.scrollscan.com/'],
+              nativeCurrency: {
+                name: 'Ethereum',
+                symbol: 'ETH',
+                decimals: 18
+              }
+            }],
+          });
+          console.log('✅ Successfully added and switched to Scroll Sepolia');
+        } else {
+          throw new Error('Please manually switch to Scroll Sepolia network in MetaMask');
+        }
+      }
     }
-
-    // Check wallet balance
-    const balance = await userWallet.provider.getBalance(await userWallet.getAddress());
-    const balanceEth = ethers.formatEther(balance);
-    console.log('💰 Wallet balance:', {
-      balanceWei: balance.toString(),
-      balanceEth,
-      tipAmount: tipAmountEth
-    });
-
-    // Create contract instance
-    const contract = new ethers.Contract(BADGE_MINTER_V2_ADDRESS, BADGE_MINTER_V2_ABI, userWallet);
-    console.log('📄 Contract instance created');
 
     // Convert ETH amount to wei
     const tipAmountWei = ethers.parseEther(tipAmountEth);
+
+    // Check wallet balance
+    const walletAddress = await userWallet.getAddress();
+    const balance = await userWallet.provider.getBalance(walletAddress);
+    const balanceEth = ethers.formatEther(balance);
+    console.log('💰 Wallet balance:', {
+      walletAddress,
+      balanceWei: balance.toString(),
+      balanceEth,
+      tipAmount: tipAmountEth,
+      hasEnoughBalance: balance >= tipAmountWei
+    });
     console.log('💱 Amount conversion:', {
       inputEth: tipAmountEth,
       outputWei: tipAmountWei.toString(),
@@ -56,9 +92,19 @@ export async function sendTipToRevivalCreator(
     });
 
     if (balance < tipAmountWei) {
-      console.error('❌ Insufficient balance for tip');
-      throw new Error('Insufficient ETH balance for tip');
+      console.error('❌ Insufficient balance for tip:', {
+        requiredWei: tipAmountWei.toString(),
+        availableWei: balance.toString(),
+        requiredEth: tipAmountEth,
+        availableEth: balanceEth,
+        shortfall: ethers.formatEther(tipAmountWei - balance)
+      });
+      throw new Error(`Insufficient ETH balance. Need ${tipAmountEth} ETH, have ${balanceEth} ETH`);
     }
+
+    // Create contract instance
+    const contract = new ethers.Contract(BADGE_MINTER_V2_ADDRESS, BADGE_MINTER_V2_ABI, userWallet);
+    console.log('📄 Contract instance created');
 
     // Estimate gas
     try {

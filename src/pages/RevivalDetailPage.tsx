@@ -158,7 +158,19 @@ export default function RevivalDetailPage() {
   };
 
   const handleBlessClick = () => {
+    console.log('🎯 Bless button clicked!', {
+      isConnected,
+      hasProfile: !!profile,
+      walletAddress: profile?.wallet_address,
+      hasBlessed,
+      revivalId,
+      reviverIdFromRevival: revival?.reviver_id,
+      currentUserId: profile?.id,
+      isOwnRevival: revival?.reviver_id === profile?.id
+    });
+
     if (!isConnected || !profile?.wallet_address) {
+      console.log('❌ Wallet not connected');
       setToastMessage('Please connect your wallet first');
       setToastType('error');
       setShowToast(true);
@@ -166,6 +178,7 @@ export default function RevivalDetailPage() {
     }
 
     if (hasBlessed) {
+      console.log('❌ Already blessed');
       setToastMessage('You have already blessed this revival');
       setToastType('error');
       setShowToast(true);
@@ -174,12 +187,14 @@ export default function RevivalDetailPage() {
 
     // Check if user is trying to bless their own revival
     if (revival?.reviver_id === profile?.id) {
+      console.log('❌ Cannot bless own revival');
       setToastMessage('You cannot bless your own revival');
       setToastType('error');
       setShowToast(true);
       return;
     }
 
+    console.log('✅ Opening blessing modal...');
     setShowBlessingModal(true);
   };
 

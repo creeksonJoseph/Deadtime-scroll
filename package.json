@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --port 5999",
-    "start": "vite --host 0.0.0.0 --port 5999",
+    "dev": "vite --port 7342",
+    "start": "vite --host 0.0.0.0 --port 7342",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
