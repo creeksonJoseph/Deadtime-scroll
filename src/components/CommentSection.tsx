@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Send, Heart, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useWallet } from '../contexts/WalletContext';
@@ -11,6 +12,7 @@ interface Comment {
     id: string;
     username: string;
     avatar_url: string | null;
+    wallet_address: string;
   };
 }
 
@@ -26,6 +28,7 @@ export default function CommentSection({ projectId, revivalId, initialCount = 0 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { profile, isConnected } = useWallet();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadComments();
@@ -43,7 +46,8 @@ export default function CommentSection({ projectId, revivalId, initialCount = 0 
           user:user_id (
             id,
             username,
-            avatar_url
+            avatar_url,
+            wallet_address
           )
         `)
         .order('created_at', { ascending: false });
@@ -185,16 +189,24 @@ export default function CommentSection({ projectId, revivalId, initialCount = 0 
                 className="group bg-zinc-800/30 hover:bg-zinc-800/50 border border-zinc-800 rounded-lg p-4 transition-all"
               >
                 <div className="flex gap-3">
-                  <img
-                    src={comment.user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'}
-                    alt={comment.user.username}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-zinc-700"
-                  />
+                  <button
+                    onClick={() => navigate(`/profile/${comment.user.wallet_address}`)}
+                    className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                  >
+                    <img
+                      src={comment.user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'}
+                      alt={comment.user.username}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-zinc-700"
+                    />
+                  </button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold text-white">
+                      <button
+                        onClick={() => navigate(`/profile/${comment.user.wallet_address}`)}
+                        className="font-semibold text-white hover:text-primary transition-colors"
+                      >
                         {comment.user.username}
-                      </span>
+                      </button>
                       <div className="flex items-center gap-1 text-xs text-zinc-500">
                         <Clock className="w-3 h-3" />
                         {formatTimeAgo(comment.created_at)}

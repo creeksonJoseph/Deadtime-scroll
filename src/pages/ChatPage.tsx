@@ -113,7 +113,10 @@ export default function ChatPage() {
             {/* Chat Header */}
             {partnerProfile && (
               <div className="p-4 border-b border-zinc-800">
-                <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate(`/profile/${partnerProfile.wallet_address}`)}
+                  className="flex items-center gap-3 hover:bg-zinc-800 rounded-lg p-2 -m-2 transition-colors w-full text-left"
+                >
                   <img
                     src={partnerProfile.avatar_url || 'https://via.placeholder.com/40'}
                     alt={partnerProfile.username}
@@ -123,7 +126,7 @@ export default function ChatPage() {
                     <p className="text-white font-semibold">{partnerProfile.username}</p>
                     <p className="text-zinc-400 text-sm">@{partnerProfile.username}</p>
                   </div>
-                </div>
+                </button>
               </div>
             )}
 
