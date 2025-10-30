@@ -1,5 +1,10 @@
-export const BADGE_MINTER_ADDRESS = "0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8";
-export const BADGE_MINTER_V2_ADDRESS = "0xFf1101fdd63e5A4b515d4c06B5bA185715Fb2f18";
+// Testnet addresses (for reference)
+export const BADGE_MINTER_ADDRESS_TESTNET = "0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8";
+export const BADGE_MINTER_V2_ADDRESS_TESTNET = "0xFf1101fdd63e5A4b515d4c06B5bA185715Fb2f18";
+
+// Mainnet addresses
+export const BADGE_MINTER_ADDRESS = "0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8"; // Deploy if needed
+export const BADGE_MINTER_V2_ADDRESS = "0xCeAc210d3e6B6436E18DEc913991e4E74665fba0";
 
 export const BADGE_MINTER_ABI = [
   "function claimBadge(uint256 blessings, uint256 nonce, bytes calldata signature) external returns (uint256)",
@@ -19,9 +24,19 @@ export const BADGE_MINTER_V2_ABI = [
   "event BadgeMinted(address indexed to, uint256 indexed tokenId, string badgeName, uint256 blessings)"
 ];
 
+export const SCROLL_MAINNET_CONFIG = {
+  chainId: 534352,
+  name: "Scroll",
+  rpcUrl: "https://rpc.scroll.io/",
+  blockExplorer: "https://scrollscan.com"
+};
+
 export const SCROLL_SEPOLIA_CONFIG = {
   chainId: 534351,
   name: "Scroll Sepolia",
   rpcUrl: "https://sepolia-rpc.scroll.io/",
   blockExplorer: "https://sepolia.scrollscan.com"
 };
+
+// Use mainnet by default, change to SCROLL_SEPOLIA_CONFIG for testing
+export const CURRENT_NETWORK = SCROLL_MAINNET_CONFIG;

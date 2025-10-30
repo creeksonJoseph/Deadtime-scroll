@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { BADGE_MINTER_ADDRESS, BADGE_MINTER_ABI, SCROLL_SEPOLIA_CONFIG } from '../config/contracts';
+import { BADGE_MINTER_ADDRESS, BADGE_MINTER_ABI, CURRENT_NETWORK } from '../config/contracts';
 
 export function useWeb3() {
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
@@ -53,7 +53,7 @@ export function useWeb3() {
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: `0x${SCROLL_SEPOLIA_CONFIG.chainId.toString(16)}` }],
+          params: [{ chainId: `0x${CURRENT_NETWORK.chainId.toString(16)}` }],
         });
         console.log('✅ Successfully switched to Scroll Sepolia');
       } catch (switchError: any) {
@@ -62,10 +62,10 @@ export function useWeb3() {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: `0x${SCROLL_SEPOLIA_CONFIG.chainId.toString(16)}`,
-              chainName: SCROLL_SEPOLIA_CONFIG.name,
-              rpcUrls: [SCROLL_SEPOLIA_CONFIG.rpcUrl],
-              blockExplorerUrls: [SCROLL_SEPOLIA_CONFIG.blockExplorer],
+              chainId: `0x${CURRENT_NETWORK.chainId.toString(16)}`,
+              chainName: CURRENT_NETWORK.name,
+              rpcUrls: [CURRENT_NETWORK.rpcUrl],
+              blockExplorerUrls: [CURRENT_NETWORK.blockExplorer],
             }],
           });
           console.log('✅ Successfully added Scroll Sepolia network');

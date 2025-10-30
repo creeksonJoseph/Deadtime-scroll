@@ -2,7 +2,9 @@ import { ethers } from 'ethers';
 import { supabase } from '../lib/supabase';
 import { BADGE_MINTER_V2_ABI, BADGE_MINTER_V2_ADDRESS } from '../config/contracts';
 
-const SCROLL_SEPOLIA_RPC = 'https://sepolia-rpc.scroll.io/';
+import { CURRENT_NETWORK } from '../config/contracts';
+
+const SCROLL_RPC = CURRENT_NETWORK.rpcUrl;
 
 export async function sendTipToRevivalCreator(
   revivalId: string,
@@ -27,19 +29,19 @@ export async function sendTipToRevivalCreator(
     console.log('🌐 Current network:', {
       chainId: network.chainId,
       name: network.name,
-      expectedChainId: 534351
+      expectedChainId: CURRENT_NETWORK.chainId
     });
 
-    if (network.chainId !== 534351n) {
-      console.warn('⚠️ Wrong network detected, switching to Scroll Sepolia (534351)');
+    if (network.chainId !== BigInt(CURRENT_NETWORK.chainId)) {
+      console.warn(`⚠️ Wrong network detected, switching to ${CURRENT_NETWORK.name} (${CURRENT_NETWORK.chainId})`);
       
       try {
-        // Try to switch to Scroll Sepolia
+        // Try to switch to Scroll Mainnet
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x82750' }], // 534351 in hex
+          params: [{ chainId: `0x${CURRENT_NETWORK.chainId.toString(16)}` }],
         });
-        console.log('✅ Successfully switched to Scroll Sepolia');
+        console.log(`✅ Successfully switched to ${CURRENT_NETWORK.name}`);
         
         // Refresh network info after switch
         const newNetwork = await userWallet.provider.getNetwork();
@@ -53,10 +55,10 @@ export async function sendTipToRevivalCreator(
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: '0x82750',
-              chainName: 'Scroll Sepolia Testnet',
-              rpcUrls: ['https://sepolia-rpc.scroll.io/', 'https://rpc.ankr.com/scroll_sepolia_testnet'],
-              blockExplorerUrls: ['https://sepolia.scrollscan.com/'],
+              chainId: `0x${CURRENT_NETWORK.chainId.toString(16)}`,
+              chainName: CURRENT_NETWORK.name,
+              rpcUrls: [CURRENT_NETWORK.rpcUrl],
+              blockExplorerUrls: [CURRENT_NETWORK.blockExplorer],
               nativeCurrency: {
                 name: 'Ethereum',
                 symbol: 'ETH',
@@ -64,9 +66,9 @@ export async function sendTipToRevivalCreator(
               }
             }],
           });
-          console.log('✅ Successfully added and switched to Scroll Sepolia');
+          console.log(`✅ Successfully added and switched to ${CURRENT_NETWORK.name}`);
         } else {
-          throw new Error('Please manually switch to Scroll Sepolia network in MetaMask');
+          throw new Error(`Please manually switch to ${CURRENT_NETWORK.name} network in MetaMask`);
         }
       }
     }
@@ -221,7 +223,7 @@ export async function registerRevivalCreator(
     }
 
     // Create provider and platform wallet
-    const provider = new ethers.JsonRpcProvider(SCROLL_SEPOLIA_RPC);
+    const provider = new ethers.JsonRpcProvider(SCROLL_RPC);
     const platformWallet = new ethers.Wallet(platformPrivateKey, provider);
     
     // Create contract instance with platform wallet

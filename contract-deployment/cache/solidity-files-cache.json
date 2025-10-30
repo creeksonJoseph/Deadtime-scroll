@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/creeksonjoseph/softwarengineering/personal-projects/Deadtime-scroll/contract-deployment/contracts/BadgeMinterV2.sol": {
-      "lastModificationDate": 1761732813034,
-      "contentHash": "71ece8b1c55a8a82574b5bbb15c35538",
+      "lastModificationDate": 1761812300856,
+      "contentHash": "654a7944c5dbf3f8f490953161ee8d01",
       "sourceName": "contracts/BadgeMinterV2.sol",
       "solcConfig": {
         "version": "0.8.19",

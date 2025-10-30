@@ -17,5 +17,10 @@ module.exports = {
       accounts: [process.env.VITE_PLATFORM_PRIVATE_KEY],
       chainId: 534351,
     },
+    scrollMainnet: {
+      url: "https://rpc.scroll.io/",
+      accounts: [process.env.VITE_PLATFORM_PRIVATE_KEY],
+      chainId: 534352,
+    },
   },
 };

@@ -28,7 +28,7 @@ contract BadgeMinterV2 is ERC721URIStorage, Ownable, ReentrancyGuard {
     event BadgeMinted(address indexed to, uint256 indexed tokenId, string badgeName, uint256 blessings);
     event TipSent(address indexed from, address indexed to, string revivalId, uint256 amount);
 
-    constructor(string memory baseURI_) ERC721("Deadtime Scroll Badges V2", "DSB2") Ownable() {
+    constructor(string memory baseURI_) ERC721("Deadtime Scroll Badges V2", "DSB2") {
         // Initialize thresholds
         thresholds.push(1);
         thresholds.push(30);
