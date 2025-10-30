@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { BADGE_MINTER_V2_ABI, BADGE_MINTER_V2_ADDRESS } from '../config/contracts';
 
-const SCROLL_SEPOLIA_RPC = 'https://sepolia-rpc.scroll.io/';
+const SCROLL_MAINNET_RPC = 'https://rpc.scroll.io/';
 
 export async function claimNFTBadgeGasless(
   badgeId: string,
@@ -16,8 +16,20 @@ export async function claimNFTBadgeGasless(
     }
 
     // Create provider and platform wallet
-    const provider = new ethers.JsonRpcProvider(SCROLL_SEPOLIA_RPC);
+    const provider = new ethers.JsonRpcProvider(SCROLL_MAINNET_RPC);
     const platformWallet = new ethers.Wallet(platformPrivateKey, provider);
+    
+    // Check platform wallet balance
+    const balance = await provider.getBalance(platformWallet.address);
+    console.log('💰 Platform wallet balance:', {
+      address: platformWallet.address,
+      balanceWei: balance.toString(),
+      balanceETH: ethers.formatEther(balance)
+    });
+    
+    if (balance === 0n) {
+      throw new Error('Platform wallet has no ETH for gas fees. Please send ETH to: ' + platformWallet.address);
+    }
     
     // Create contract instance with platform wallet
     const contract = new ethers.Contract(BADGE_MINTER_V2_ADDRESS, BADGE_MINTER_V2_ABI, platformWallet);
