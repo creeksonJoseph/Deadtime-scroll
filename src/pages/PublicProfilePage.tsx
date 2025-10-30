@@ -121,7 +121,7 @@ export default function PublicProfilePage() {
                     {viewingWallet}
                   </p>
                   <a
-                    href={`https://sepolia.scrollscan.com/address/${viewingWallet}`}
+                    href={`https://scrollscan.com/address/${viewingWallet}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary-dark transition-colors"

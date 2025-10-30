@@ -96,7 +96,7 @@ function BadgeCard({ badge, badgeInfo, onClaim, isOwnProfile }: BadgeCardProps) 
             </div>
             {badge.tx_hash && (
               <a
-                href={`https://sepolia.scrollscan.com/tx/${badge.tx_hash}`}
+                href={`https://scrollscan.com/tx/${badge.tx_hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-dark transition-colors"
