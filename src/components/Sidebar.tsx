@@ -1,4 +1,4 @@
-import { Upload, FolderOpen, Sparkles, MessageCircle, Trophy, User, LogOut, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { FolderOpen, Sparkles, MessageCircle, Trophy, User, LogOut, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 
@@ -21,7 +21,6 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onToggle, onMobileC
   };
 
   const menuItems = [
-    { icon: Upload, label: 'Submit Project', path: '/submit' },
     { icon: FolderOpen, label: 'Projects', path: '/projects' },
     { icon: Sparkles, label: 'My Revivals', path: '/my-revivals' },
     { icon: FileText, label: 'My Projects', path: '/my-projects' },
