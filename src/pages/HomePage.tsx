@@ -117,7 +117,7 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
           >
-            "Reviving Abandoned Projects. One Line of Code at a Time."
+            "Post your unfinished projects and watch the community help you build it"
           </motion.p>
           <motion.div
             className="flex flex-col md:flex-row gap-6 justify-center"
