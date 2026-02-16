@@ -1,0 +1,36 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Runs at 10:00 AM UTC on Monday, Wednesday, and Friday
+    - cron: '0 10 * * 1,3,5'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Supabase Project
+        run: |
+          echo "Pinging Supabase project at $(date)"
+          
+          # Simple health check ping
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/")
+          
+          echo "Response code: $response"
+          
+          if [ $response -eq 200 ] || [ $response -eq 401 ] || [ $response -eq 404 ]; then
+            echo "✅ Supabase project is alive (HTTP $response)"
+          else
+            echo "⚠️ Unexpected response code: $response"
+            exit 1
+          fi
+
+      - name: Report Status
+        if: always()
+        run: |
+          echo "Keep-alive ping completed at $(date)"
